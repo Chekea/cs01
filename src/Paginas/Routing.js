@@ -3,17 +3,16 @@ import { Routes, Route } from "react-router-dom";
 import Nacional from "./Nacional";
 
 import Exterior from "./Exterior";
-import Dashbord from "./Dashbord";
 import DetallesCompra from "./DetallesCompra";
-import DetallesVentas from "./DetallesVentas";
-import Solicitud from "./Solicitud";
+import Publicar from "./Publicar";
 
 export const Routing = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Solicitud />} />
+        <Route path="/" element={<Publicar />} />
         <Route path="/Nacional" element={<Nacional />} />
+
         <Route path="/Exterior" element={<Exterior />} />
 
         <Route

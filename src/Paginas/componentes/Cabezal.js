@@ -13,9 +13,9 @@ const Cabezal = () => {
     color: "white",
   };
 
-  if (isMobile) {
-    return null; // Don't render the AppBar on mobile devices
-  }
+  // if (isMobile) {
+  //   return null; // Don't render the AppBar on mobile devices
+  // }
 
   return (
     <AppBar position="sticky" color="warning" style={{ top: 0, zIndex: 1000 }}>
@@ -32,13 +32,13 @@ const Cabezal = () => {
           }}
         >
           <Link to="/" style={linkStyles}>
-            Solicitar
+            Publicar
           </Link>
           <Link to="/Nacional" style={linkStyles}>
-            Compras
+            Nacional
           </Link>
           <Link to="/Exterior" style={linkStyles}>
-            Solicitudes
+            Exterior
           </Link>
           {/* <Link to="/Ventas" style={linkStyles}>
             Ventas

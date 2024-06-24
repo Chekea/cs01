@@ -11,6 +11,7 @@ export const extract = (string) => {
   return match ? match[0] : null;
 };
 // notificacion
+export const lugar = (pais) => (pais === "Guinea Ecuatorial" ? "Nacional" : "Exterior");
 
 export const sendNotification = async (token, title, body) => {
   try {
