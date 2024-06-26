@@ -229,7 +229,7 @@ const DetallesCompra = () => {
   return (
     <div>
       {!loading ? (
-        <div>
+        <div style={{ paddingTop: "65px" }}>
           <Alert
             open={open}
             message={mensaje}
