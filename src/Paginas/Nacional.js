@@ -30,7 +30,8 @@ const MemoizedCajaItem = memo(CajaItem);
 
 function Nacional() {
   const [selectedChip, setSelectedChip] = useState(
-    localStorage.getItem("selectedChip") || "Comprado"
+    "Comprado"
+    // localStorage.getItem("selectedChip") ||
   );
   const [loading, setLoading] = useState(true);
   const [endloading, setendloading] = useState(true);
@@ -41,7 +42,8 @@ function Nacional() {
   const database = getDatabase(app);
 
   const [data, setData] = useState(
-    JSON.parse(localStorage.getItem("data")) || []
+    []
+    // JSON.parse(localStorage.getItem("data")) || []
   );
   const handleChipClick = useCallback(
     (chipValue) => {
@@ -63,13 +65,6 @@ function Nacional() {
     },
     [selectedChip]
   );
-  useEffect(() => {
-    // Store the state in local storage when the component unmounts
-    return () => {
-      localStorage.setItem("selectedChip", selectedChip);
-      localStorage.setItem("data", JSON.stringify(data));
-    };
-  }, [selectedChip, data]);
 
   const fetchData = (codigo, estado) => {
     const databaseRef = ref(database, "GE/Compras/Nacional");
@@ -156,7 +151,15 @@ function Nacional() {
   }, []);
 
   return (
-    <div style={{ padding: 8, overflowY: "auto", height: "95vh" }} ref={divRef}>
+    <div
+      style={{
+        padding: 8,
+        overflowY: "auto",
+        height: "95vh",
+        paddingTop: "65px",
+      }}
+      ref={divRef}
+    >
       <Chip
         label="Comprado"
         style={{ marginRight: "8px" }}

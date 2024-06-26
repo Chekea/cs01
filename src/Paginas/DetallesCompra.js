@@ -83,6 +83,8 @@ const DetallesCompra = () => {
     // Handle confirm action
 
     if (enviado !== "Enviado") {
+      const notificacionPath = `GE/NotificacionReb/${object.Codigo}`;
+
       RemoveVaueDB(
         `GE/Comprador/${data.Comprador}/MisCompras/Enviado/${object.Codigo}`
       )
@@ -92,6 +94,16 @@ const DetallesCompra = () => {
             `GE/Comprador/${data.Comprador}/MisCompras/Retirado/${object.Codigo}`
           );
           UpdateDb({ Estado: "Retirado" }, `GE/Compras/Nacional/${codigo}`);
+          // UpdateDb( {
+          //   Codigo: item.Producto,
+          //   Vendedor: item.Vendedor,
+          //   contexto: item.contexto,
+          //   Cantidad: item.Cantidad,
+          //   isTrue: false,
+          //   Comprador: usuario().uid,
+          //   Fecha: getCurrentTimestamp(),
+          // }, `GE/NotificacionReb/${object.Codigo}`);
+
           WriteDbPush(
             {
               Id: data.Comprador,

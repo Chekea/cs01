@@ -18,7 +18,7 @@ const Cabezal = () => {
   // }
 
   return (
-    <AppBar position="sticky" color="warning" style={{ top: 0, zIndex: 1000 }}>
+    <AppBar position="fixed" color="warning" style={{ top: 0, zIndex: 1000 }}>
       <Toolbar>
         <div
           style={{
@@ -31,9 +31,11 @@ const Cabezal = () => {
             paddingVertical: 16,
           }}
         >
-          <Link to="/" style={linkStyles}>
-            Publicar
-          </Link>
+          {!isMobile && (
+            <Link to="/" style={linkStyles}>
+              Publicar
+            </Link>
+          )}
           <Link to="/Nacional" style={linkStyles}>
             Nacional
           </Link>
@@ -41,8 +43,8 @@ const Cabezal = () => {
             Exterior
           </Link>
           {/* <Link to="/Ventas" style={linkStyles}>
-            Ventas
-          </Link> */}
+          Ventas
+        </Link> */}
         </div>
       </Toolbar>
     </AppBar>
