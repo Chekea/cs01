@@ -473,7 +473,7 @@ const Publicar = () => {
   return (
     <Box>
       {showbox && (
-        <Box sx={{ display: "flex", gap: 2, m: 4 }}>
+        <Box sx={{ display: "flex", gap: 5, m: 10 }}>
           <Button
             variant="contained"
             onClick={() => handleButtonClick("Nacional")}

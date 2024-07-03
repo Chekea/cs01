@@ -8,9 +8,9 @@ import Publicar from "./Publicar";
 import { useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
-export const Routing = () => {
+export const Routing = ({ email }) => {
   const theme = useTheme();
-
+  console.log("wetin ", email);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
@@ -19,9 +19,9 @@ export const Routing = () => {
         {!isMobile ? (
           <Route path="/" element={<Publicar />} />
         ) : (
-          <Route path="/" element={<Nacional />} />
+          <Route path="/" element={<Nacional email={email} />} />
         )}
-        <Route path="/Nacional" element={<Nacional />} />
+        <Route path="/Nacional" element={<Nacional email={email} />} />
 
         <Route path="/Exterior" element={<Exterior />} />
 

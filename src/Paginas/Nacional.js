@@ -28,9 +28,9 @@ import { Button, IconButton } from "@mui/material";
 
 const MemoizedCajaItem = memo(CajaItem);
 
-function Nacional() {
+function Nacional({ email }) {
   const [selectedChip, setSelectedChip] = useState(
-    "Comprado"
+    email !== "eiby" ? "Enviado" : "Comprado"
     // localStorage.getItem("selectedChip") ||
   );
   const [loading, setLoading] = useState(true);
@@ -160,27 +160,31 @@ function Nacional() {
       }}
       ref={divRef}
     >
-      <Chip
-        label="Comprado"
-        style={{ marginRight: "8px" }}
-        clickable
-        onClick={() => handleChipClick("Comprado")}
-        color={selectedChip === "Comprado" ? "primary" : "default"}
-      />
-      <Chip
-        label="Enviado"
-        clickable
-        style={{ marginRight: "8px" }}
-        onClick={() => handleChipClick("Enviado")}
-        color={selectedChip === "Enviado" ? "primary" : "default"}
-      />
-      <Chip
-        label="Retirado"
-        clickable
-        style={{ marginRight: "8px" }}
-        onClick={() => handleChipClick("Retirado")}
-        color={selectedChip === "Retirado" ? "primary" : "default"}
-      />
+      {email !== "eiby" && (
+        <div>
+          <Chip
+            label="Comprado"
+            style={{ marginRight: "8px" }}
+            clickable
+            onClick={() => handleChipClick("Comprado")}
+            color={selectedChip === "Comprado" ? "primary" : "default"}
+          />
+          <Chip
+            label="Enviado"
+            clickable
+            style={{ marginRight: "8px" }}
+            onClick={() => handleChipClick("Enviado")}
+            color={selectedChip === "Enviado" ? "primary" : "default"}
+          />
+          <Chip
+            label="Retirado"
+            clickable
+            style={{ marginRight: "8px" }}
+            onClick={() => handleChipClick("Retirado")}
+            color={selectedChip === "Retirado" ? "primary" : "default"}
+          />
+        </div>
+      )}
 
       <div style={{ marginTop: 10 }}>
         {loading ? (

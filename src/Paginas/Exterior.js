@@ -5,12 +5,20 @@ import {
   getDatabase,
   ref,
   onValue,
-  limitToLast,
   query,
+  orderByChild,
+  equalTo,
+  limitToLast,
+  update,
+  runTransaction,
+  get,
+  endAt,
+  startAt,
 } from "firebase/database";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import app from "./../Servicios/firebases";
+import { analizar } from "../ayuda";
 function Exterior() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,25 +29,54 @@ function Exterior() {
   const handleChipClick = (chipValue) => {
     setSelectedChip(chipValue === selectedChip ? null : chipValue);
   };
-  const fetchData = () => {
-    setLoading(true); // Set loading state to true when fetching data
-
+  const fetchData = (codigo, estado) => {
     const databaseRef = ref(database, "GE/Compras/Exterior");
-    const queryRef = query(databaseRef, limitToLast(10));
+    let queryRef;
 
-    onValue(
-      queryRef,
-      (snapshot) => {
-        const data = Object.values(snapshot.val() || {});
-        setData(data);
-        setLoading(false); // Set loading state to false after data is fetched
-      },
-      (error) => {
+    if (data.length !== 0) {
+      console.log("volvio 0");
+
+      queryRef = query(
+        databaseRef,
+        orderByChild("Codigo"),
+        endAt(codigo),
+        limitToLast(6)
+      );
+    } else {
+      console.log("volvio 1");
+
+      queryRef = query(databaseRef, limitToLast(16));
+    }
+
+    get(queryRef)
+      .then((snapshot) => {
+        const newData = [];
+        snapshot.forEach((childSnapshot) => {
+          const childData = childSnapshot.val();
+          console.log(childData.Codigo);
+          if (childData && !analizar(childData.Codigo, data)) {
+            newData.unshift(childData);
+          }
+        });
+        if (data.length !== 0) {
+          console.log("mantenimiento");
+          setData((old) => [...old, ...newData]);
+        } else {
+          setData(newData);
+        }
+        setLoading(false);
+
+        if (newData.length === 0) {
+          console.log("no existe");
+          setLoading(false);
+        }
+      })
+      .catch((error) => {
         console.error("Error fetching data:", error);
-        setLoading(false); // Set loading state to false even if there's an error
-      }
-    );
+        setLoading(false);
+      });
   };
+
   useEffect(() => {
     fetchData();
 
@@ -51,7 +88,7 @@ function Exterior() {
 
   return (
     <div style={{ padding: 8 }}>
-      <div style={{ marginTop: 10 }}>
+      <div style={{ paddingTop: 50 }}>
         {loading ? ( // Display CircularProgress if loading is true
           <div
             style={{

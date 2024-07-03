@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, useMediaQuery } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 
-const Cabezal = () => {
+const Cabezal = ({ email }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -12,6 +12,8 @@ const Cabezal = () => {
     margin: 10,
     color: "white",
   };
+
+  console.log(email, "2");
 
   // if (isMobile) {
   //   return null; // Don't render the AppBar on mobile devices
@@ -42,6 +44,11 @@ const Cabezal = () => {
           <Link to="/Exterior" style={linkStyles}>
             Exterior
           </Link>
+
+          {/* {email === "eiby" && (
+            
+          )} */}
+
           {/* <Link to="/Ventas" style={linkStyles}>
           Ventas
         </Link> */}

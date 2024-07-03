@@ -49,6 +49,31 @@ const DetallesCompra = () => {
   const handleOpen = (object) => {
     setOpen(true);
   };
+  console.log(data.Codigo);
+  const sendWhatsAppMessage = () => {
+    const phoneNumber = `+8613212074721`; // Replace with the target phone number
+    const message = `Buenas, s necesita verificacion para que Chekea envie su compra ${data.CompraId} , basta con responder con un OK`; // Replace with your message
+    const appUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
+      message
+    )}`;
+    const webUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    // Create a temporary link to test the app URL scheme
+    const tempLink = document.createElement("a");
+    tempLink.href = appUrl;
+
+    // Attempt to open the WhatsApp app
+    tempLink.click();
+
+    // Fallback to the web version if the app is not installed
+    setTimeout(() => {
+      if (document.visibilityState === "visible") {
+        window.open(webUrl, "_blank");
+      }
+    }, 500);
+  };
 
   const receiveForChild = (object, botton) => {
     // checkear el estado si ya se envio o no
@@ -82,77 +107,193 @@ const DetallesCompra = () => {
   const handleConfirm = async () => {
     // Handle confirm action
 
-    if (enviado !== "Enviado") {
-      const notificacionPath = `GE/NotificacionReb/${object.Codigo}`;
-
-      RemoveVaueDB(
-        `GE/Comprador/${data.Comprador}/MisCompras/Enviado/${object.Codigo}`
-      )
-        .then(() => {
-          WriteDb(
-            object,
-            `GE/Comprador/${data.Comprador}/MisCompras/Retirado/${object.Codigo}`
-          );
-          UpdateDb({ Estado: "Retirado" }, `GE/Compras/Nacional/${codigo}`);
-          // UpdateDb( {
-          //   Codigo: item.Producto,
-          //   Vendedor: item.Vendedor,
-          //   contexto: item.contexto,
-          //   Cantidad: item.Cantidad,
-          //   isTrue: false,
-          //   Comprador: usuario().uid,
-          //   Fecha: getCurrentTimestamp(),
-          // }, `GE/NotificacionReb/${object.Codigo}`);
-
+    switch (enviado) {
+      case "Enviado":
+        RemoveVaueDB(
+          `GE/Comprador/${data.Comprador}/MisCompras/Verificando/${object.Codigo}`
+        )
+          .then(() => {
+            WriteDb(
+              object,
+              `GE/Comprador/${data.Comprador}/MisCompras/Enviado/${object.Codigo}`
+            ).then(() => {
+              UpdateDb(
+                { Estado: "Enviado" },
+                `GE/Compras/${object.contexto}/${codigo}`
+              );
+              WriteDbPush(
+                {
+                  Id: data.Comprador,
+                  Mensaje: "Su producto ha sido enviado satisfactoriamente",
+                  Titulo: "Producto Enviado",
+                },
+                `GE/Notificaciones`
+              ); // enviar datas al nodo y hacer listening in cservices
+            });
+          })
+          .catch((error) => {
+            console.error("Error deleting node:", error);
+            // Handle error situation here
+          });
+        break;
+      case "Comprado":
+        UpdateDb(
+          { Estado: "Comprado" },
+          `GE/Comprador/${data.Comprador}/MisCompras/Verificando/${object.Codigo}`
+        ).then(() => {
+          UpdateDb({ Estado: "Comprado" }, `GE/Compras/Exterior/${codigo}`);
           WriteDbPush(
             {
               Id: data.Comprador,
-              Mensaje: "Su producto ha sido retirado satisfactoriamente",
-              Titulo: "Producto Retirado",
+              Mensaje:
+                "Su compra ha sido verificada y a esperas de ser enviado el producto",
+              Titulo: "Compra Verificad",
             },
             `GE/Notificaciones`
           );
-        })
-        .catch((error) => {
-          console.error("Error deleting node:", error);
-          // Handle error situation here
         });
-    } else {
-      RemoveVaueDB(
-        `GE/Comprador/${data.Comprador}/MisCompras/Verificando/${object.Codigo}`
-      )
-        .then(() => {
-          WriteDb(
-            object,
-            `GE/Comprador/${data.Comprador}/MisCompras/Enviado/${object.Codigo}`
-          ).then(() => {
-            UpdateDb({ Estado: "Enviado" }, `GE/Compras/Nacional/${codigo}`);
+
+        break;
+      case "Error":
+        RemoveVaueDB(
+          `GE/Comprador/${data.Comprador}/MisCompras/Verificando/${object.Codigo}`
+        )
+          .then(() => {
+            WriteDb(
+              object,
+              `GE/Comprador/${data.Comprador}/MisCompras/Error/${object.Codigo}`
+            ).then(() => {
+              UpdateDb({ Estado: "Error" }, `GE/Compras/Exterior/${codigo}`);
+              WriteDbPush(
+                {
+                  Id: data.Comprador,
+                  Mensaje:
+                    "Ha surgido un error en su compra,porfavor contacte a atencion al cliente",
+                  Titulo: "Error de Compra",
+                },
+                `GE/Notificaciones`
+              ); // enviar datos al nodo y hacer listening in cservices
+            });
+          })
+          .catch((error) => {
+            console.error("Error deleting node:", error);
+            // Handle error situation here
+          });
+        break;
+      case "Retirado":
+        RemoveVaueDB(
+          `GE/Comprador/${data.Comprador}/MisCompras/Enviado/${object.Codigo}`
+        )
+          .then(() => {
+            WriteDb(
+              object,
+              `GE/Comprador/${data.Comprador}/MisCompras/Retirado/${object.Codigo}`
+            );
+            UpdateDb(
+              { Estado: "Retirado" },
+              `GE/Compras/${object.contexto}/${codigo}`
+            );
+            UpdateDb(
+              {
+                Codigo: object.Producto,
+                Vendedor: object.Vendedor,
+                contexto: object.contexto,
+                Cantidad: object.Cantidad,
+                Id: object.Fecha,
+
+                isTrue: false,
+                Comprador: data.Comprador,
+                Fecha: object.Retiro,
+              },
+              `GE/NotificacionReb/${object.Fecha}`
+            );
+
             WriteDbPush(
               {
                 Id: data.Comprador,
-                Mensaje: "Su producto ha sido enviado satisfactoriamente",
-                Titulo: "Producto Enviado",
+                Mensaje: "Su producto ha sido retirado satisfactoriamente",
+                Titulo: "Producto Retirado",
               },
               `GE/Notificaciones`
-            ); // enviar datos al nodo y hacer listening in cservices
+            );
+          })
+          .catch((error) => {
+            console.error("Error deleting node:", error);
+            // Handle error situation here
           });
-          // sendNotif(
-          //   data.Comprador,
-          //   "Producto Enviado",
-          //   "Su producto ha sido enviado satisfactoriamente"
-          // );
-
-          // Handle success situation here
-        })
-        .catch((error) => {
-          console.error("Error deleting node:", error);
-          // Handle error situation here
-        });
+        break;
+      default:
+        console.log("ninguno");
+        break;
     }
 
     handleClose();
   };
 
+  const handleObjecto = (obj, valor) => {
+    setEnviado(valor);
+
+    switch (valor) {
+      case "Comprado":
+        setmensaje(
+          `Seguro que el producto de codigo ${extract(
+            String(data.CompraId)
+          )} ya fue verificado?\n\n PORFAVOR ASEGURESE!!!`
+        );
+        setobject({
+          ...obj,
+          Estado: "Comprado", // Update the value of Estado field
+        });
+        break;
+      case "Error":
+        setmensaje(
+          `Seguro que el producto de codigo ${extract(
+            String(data.CompraId)
+          )} tiene un error?\n\n PORFAVOR ASEGURESE!!!`
+        );
+        setobject({
+          ...object,
+          Estado: "Error", // Update the value of Estado field
+        });
+        break;
+      case "Enviado":
+        setmensaje(
+          `Seguro que el producto de codigo ${extract(
+            String(data.CompraId)
+          )} ya fue enviado?\n\n PORFAVOR ASEGURESE!!!`
+        );
+        setobject({
+          ...obj,
+          Estado: "Enviado", // Update the value of Estado field
+          Envio: new Date().getTime(),
+        });
+        break;
+      default:
+        setmensaje(
+          `Seguro que el producto de codigo ${extract(
+            String(data.CompraId)
+          )} ya fue retirado?\n\n PORFAVOR ASEGURESE!!!`
+        );
+        setobject({
+          ...obj,
+          Estado: "Retirado", // Update the value of Estado field
+          Retiro: new Date().getTime(),
+        });
+        break;
+    }
+
+    console.log("otro mas", object);
+  };
+  const handleCompra = (valor) => {
+    setOpen(true);
+
+    carddata.forEach((producto) => {
+      handleObjecto(producto, valor);
+      // const id = producto.id;
+      // const vendedor = data.Comprador;
+      // fetchData(vendedor, id);
+    });
+  };
   useEffect(() => {
     let da = [];
     const fetchData = () => {
@@ -181,7 +322,10 @@ const DetallesCompra = () => {
   useEffect(() => {
     if (!hasFetchedData && userData.length !== 0) {
       const fetchData = (vendedor, codigo) => {
-        let valor = data.Estado === "Comprado" ? "Verificando" : "Enviado";
+        let valor =
+          data.Estado === "Comprado" || data.Estado === "Verificando..."
+            ? "Verificando"
+            : data.Estado;
         const databaseRef = ref(
           database,
           `GE/Comprador/${vendedor}/MisCompras/${valor}/${codigo}`
@@ -189,6 +333,7 @@ const DetallesCompra = () => {
         get(databaseRef)
           .then((snapshot) => {
             if (snapshot.exists()) {
+              console.log(snapshot.val(), "hold man");
               setcarddata((prevData) => [...prevData, snapshot.val()]);
               console.log(snapshot.val());
               setHasFetchedData(true);
@@ -204,7 +349,6 @@ const DetallesCompra = () => {
       userData.forEach((producto) => {
         const id = producto.id;
         const vendedor = data.Comprador;
-        console.log(data.Comprador, "bohao");
         fetchData(vendedor, id);
       });
 
@@ -327,29 +471,69 @@ const DetallesCompra = () => {
                     </div>
                   ) : null}
                   {data.Contexto === "Exterior" ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        marginBottom: "10px",
-                        marginTop: "10px",
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        style={{ borderRadius: "20px", marginRight: "14px" }}
+                    data.Estado === "Verificando..." ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginBottom: "10px",
+                          marginTop: "10px",
+                        }}
                       >
-                        Comprado
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        style={{ borderRadius: "10px", marginRight: "14px" }}
+                        <Button
+                          onClick={() => handleCompra("Comprado")}
+                          variant="contained"
+                          color="primary"
+                          style={{ borderRadius: "20px", marginRight: "14px" }}
+                        >
+                          Comprado
+                        </Button>
+                        <Button
+                          onClick={() => handleCompra("Error")}
+                          variant="contained"
+                          color="error"
+                          style={{ borderRadius: "10px", marginRight: "14px" }}
+                        >
+                          Error
+                        </Button>
+                      </div>
+                    ) : data.Estado === "Comprado" ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginBottom: "10px",
+                          marginTop: "10px",
+                        }}
                       >
-                        Error
-                      </Button>
-                    </div>
+                        <Button
+                          onClick={() => handleCompra("Enviado")}
+                          variant="contained"
+                          color="primary"
+                          style={{ borderRadius: "20px", marginRight: "14px" }}
+                        >
+                          Enviado
+                        </Button>
+                      </div>
+                    ) : data.Estado === "Enviado" ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          marginBottom: "10px",
+                          marginTop: "10px",
+                        }}
+                      >
+                        <Button
+                          onClick={() => handleCompra("Retirado")}
+                          variant="contained"
+                          color="primary"
+                          style={{ borderRadius: "20px", marginRight: "14px" }}
+                        >
+                          Retirado
+                        </Button>
+                      </div>
+                    ) : null
                   ) : null}
                 </Grid>
                 {enviado === "" ? (
@@ -476,6 +660,7 @@ const DetallesCompra = () => {
                   <Button
                     variant="contained"
                     color="primary"
+                    onClick={receiveForChild}
                     style={{ borderRadius: "20px", marginRight: "14px" }}
                   >
                     Comprado
@@ -503,6 +688,9 @@ const DetallesCompra = () => {
         >
           <CircularProgress />
         </div>
+      )}
+      {data.Contexto === "Nacional" && (
+        <button onClick={sendWhatsAppMessage}>CONFIRMAR COMPRA </button>
       )}
     </div>
   );

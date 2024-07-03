@@ -39,7 +39,7 @@ function CajaItem({ dats, venta }) {
       key={item.Codigo}
     >
       <Typography>{item.CompraId}</Typography>
-      <Typography>{item.Estado}</Typography>
+      {item.Contexto === "Exterior" && <Typography>{item.Estado}</Typography>}
     </Box>
   ));
 }
