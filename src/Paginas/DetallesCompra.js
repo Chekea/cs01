@@ -106,7 +106,6 @@ const DetallesCompra = () => {
 
   const handleConfirm = async () => {
     // Handle confirm action
-
     switch (enviado) {
       case "Enviado":
         RemoveVaueDB(
@@ -623,56 +622,93 @@ const DetallesCompra = () => {
 
           {isMobile ? (
             <div>
-              {data.Estado === "Comprado" ? (
-                data.Imagen !== null ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      marginTop: "10px",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <div style={{ width: "50%", height: "50%" }}>
-                      <img
-                        src={data.Imagen}
-                        alt="Image"
-                        style={{
-                          width: "100%",
-                          height: "50%",
-                          objectFit: "contain",
-                        }}
-                      />
-                    </div>
-                  </div>
-                ) : null
-              ) : null}
-
-              {data.Contexto === "Exterior" ? (
+              {data.Imagen !== null ? (
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "center",
-                    marginBottom: "10px",
                     marginTop: "10px",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={receiveForChild}
-                    style={{ borderRadius: "20px", marginRight: "14px" }}
-                  >
-                    Comprado
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    style={{ borderRadius: "10px", marginRight: "14px" }}
-                  >
-                    Error
-                  </Button>
+                  <div style={{ width: "50%", height: "50%" }}>
+                    <img
+                      src={data.Imagen}
+                      alt="Image"
+                      style={{
+                        width: "100%",
+                        height: "50%",
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
                 </div>
+              ) : null}
+
+              {data.Contexto === "Exterior" ? (
+                data.Estado === "Verificando..." ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginBottom: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <Button
+                      onClick={() => handleCompra("Comprado")}
+                      variant="contained"
+                      color="primary"
+                      style={{ borderRadius: "20px", marginRight: "14px" }}
+                    >
+                      Comprado
+                    </Button>
+                    <Button
+                      onClick={() => handleCompra("Error")}
+                      variant="contained"
+                      color="error"
+                      style={{ borderRadius: "10px", marginRight: "14px" }}
+                    >
+                      Error
+                    </Button>
+                  </div>
+                ) : data.Estado === "Comprado" ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginBottom: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <Button
+                      onClick={() => handleCompra("Enviado")}
+                      variant="contained"
+                      color="primary"
+                      style={{ borderRadius: "20px", marginRight: "14px" }}
+                    >
+                      Enviado
+                    </Button>
+                  </div>
+                ) : data.Estado === "Enviado" ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      marginBottom: "10px",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <Button
+                      onClick={() => handleCompra("Retirado")}
+                      variant="contained"
+                      color="primary"
+                      style={{ borderRadius: "20px", marginRight: "14px" }}
+                    >
+                      Retirado
+                    </Button>
+                  </div>
+                ) : null
               ) : null}
             </div>
           ) : null}
