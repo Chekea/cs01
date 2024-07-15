@@ -34,6 +34,10 @@ export const Routing = React.memo(({ email, logout }) => {
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
+        <Route
+          path="/cs01"
+          element={<Principal email={email} logout={logout} />}
+        />
         <Route path="/" element={<Principal email={email} logout={logout} />} />
         <Route path="/Publicar" element={<Publicar />} />
 
