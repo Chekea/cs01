@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import CajaItem from "./componentes/CajaItem";
-import Chip from "@mui/material/Chip";
+import { useMediaQuery, useTheme } from "@mui/material";
 import {
   getDatabase,
   ref,
@@ -19,10 +19,17 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import app from "./../Servicios/firebases";
 import { analizar } from "../ayuda";
+import { useNavigate } from "react-router";
+import Cabezal from "./componentes/Cabezal";
+const MemoizedCajaItem = memo(CajaItem);
+
 function Exterior() {
   const [selectedChip, setSelectedChip] = useState(null);
   const [loading, setLoading] = useState(true);
+  const theme = useTheme();
+  const navigate = useNavigate();
 
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [data, setData] = useState([]);
   const database = getDatabase(app);
 
@@ -87,23 +94,22 @@ function Exterior() {
   }, []); // Empty dependency array means this effect runs once after the component mounts
 
   return (
-    <div style={{ padding: 8 }}>
-      <div style={{ paddingTop: 50 }}>
-        {loading ? ( // Display CircularProgress if loading is true
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <CircularProgress />
-          </div>
-        ) : (
-          <CajaItem dats={data} venta={false} />
-        )}
-      </div>
+    <div style={{ marginTop: isMobile ? 60 : 10 }}>
+      <Cabezal texto={"Exterior"} />
+      {loading ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <CircularProgress />
+        </div>
+      ) : (
+        <MemoizedCajaItem dats={data} venta={false} valor="Exterior" />
+      )}
     </div>
   );
 }

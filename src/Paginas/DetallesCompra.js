@@ -24,6 +24,7 @@ import {
 import { extract, sendNotification } from "../ayuda";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Cabezal from "./componentes/Cabezal";
 
 const DetallesCompra = () => {
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ const DetallesCompra = () => {
   console.log(data.Codigo);
   const sendWhatsAppMessage = () => {
     const phoneNumber = `+8613212074721`; // Replace with the target phone number
-    const message = `Buenas, s necesita verificacion para que Chekea envie su compra ${data.CompraId} , basta con responder con un OK`; // Replace with your message
+    const message = `Buenas, se necesita verificacion para que Chekea envie su compra ${data.CompraId} , basta con responder con un OK`; // Replace with your message
     const appUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
       message
     )}`;
@@ -63,17 +64,24 @@ const DetallesCompra = () => {
     // Create a temporary link to test the app URL scheme
     const tempLink = document.createElement("a");
     tempLink.href = appUrl;
+    tempLink.style.display = "none";
+    document.body.appendChild(tempLink);
 
     // Attempt to open the WhatsApp app
     tempLink.click();
 
     // Fallback to the web version if the app is not installed
     setTimeout(() => {
+      // Check if the visibility state is still visible
       if (document.visibilityState === "visible") {
         window.open(webUrl, "_blank");
       }
+      document.body.removeChild(tempLink);
     }, 500);
   };
+
+  // Example button to trigger the function
+  <button onClick={sendWhatsAppMessage}>Send WhatsApp Message</button>;
 
   const receiveForChild = (object, botton) => {
     // checkear el estado si ya se envio o no
@@ -321,6 +329,7 @@ const DetallesCompra = () => {
   useEffect(() => {
     if (!hasFetchedData && userData.length !== 0) {
       const fetchData = (vendedor, codigo) => {
+        console.log(data.Estado, "entar");
         let valor =
           data.Estado === "Comprado" || data.Estado === "Verificando..."
             ? "Verificando"
@@ -372,7 +381,7 @@ const DetallesCompra = () => {
   return (
     <div>
       {!loading ? (
-        <div style={{ paddingTop: "65px" }}>
+        <div style={{ paddingTop: "10px" }}>
           <Alert
             open={open}
             message={mensaje}
@@ -557,20 +566,14 @@ const DetallesCompra = () => {
             ) : (
               // Vertical layout for mobile
               <div>
-                <button
-                  style={{
-                    margin: 10,
+                <Cabezal texto={"Detalles"} />
 
-                    background: "none", // Set background to none
-                    border: "none", // Remove border
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
                   }}
-                  onClick={handleBackClick}
                 >
-                  <ArrowBackIcon style={{ fontSize: 30 }} />
-                  {/* Increase the size of the icon */}
-                </button>
-
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
                   <Grid item xs={10}>
                     <h2>{`INFORMACION COMPRA \n\nCodigo:${data.CompraId} `}</h2>
                     <Grid container spacing={2}>

@@ -20,6 +20,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from "firebase/storage";
+import Cabezal from "./componentes/Cabezal";
 
 const ImagePreview = ({ file, onRemove, index }) => {
   const [src, setSrc] = useState("");
@@ -472,6 +473,7 @@ const Publicar = () => {
 
   return (
     <Box>
+      <Cabezal texto={"Publicar Prod"} />
       {showbox && (
         <Box sx={{ display: "flex", gap: 5, m: 10 }}>
           <Button
@@ -490,11 +492,7 @@ const Publicar = () => {
       )}
 
       {view !== "" && (
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{ mt: 2, padding: 2 }}
-        >
+        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
           {view === "Exterior" && (
             <div style={{ margin: 10 }}>
               {chipOptions1.map((option) => (

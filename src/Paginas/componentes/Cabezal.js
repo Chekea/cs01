@@ -1,61 +1,43 @@
 import React from "react";
-import { AppBar, Toolbar, Typography, useMediaQuery } from "@mui/material";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+import { IconButton, useMediaQuery } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
-const Cabezal = ({ email }) => {
+const Cabezal = ({ texto }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
 
-  const linkStyles = {
-    textDecoration: "none",
-    margin: 10,
-    color: "white",
-  };
-
-  console.log(email, "2");
-
-  // if (isMobile) {
-  //   return null; // Don't render the AppBar on mobile devices
-  // }
+  const headerHeight = 60; // Adjust this value based on your design
 
   return (
-    <AppBar position="fixed" color="warning" style={{ top: 0, zIndex: 1000 }}>
-      <Toolbar>
+    <>
+      {isMobile && (
         <div
           style={{
-            padding: 8,
+            position: "fixed",
+            top: 0,
+            left: 0,
             width: "100%",
+            height: headerHeight,
+            padding: theme.spacing(1),
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: theme.shadows[2],
             display: "flex",
-            flexDirection: "row",
-            overflowX: "hidden",
-            justifyContent: "space-around",
-            paddingVertical: 16,
+            alignItems: "center",
+            zIndex: 1000,
+            boxSizing: "border-box",
           }}
         >
-          {!isMobile && (
-            <Link to="/" style={linkStyles}>
-              Publicar
-            </Link>
-          )}
-          <Link to="/Nacional" style={linkStyles}>
-            Nacional
-          </Link>
-          <Link to="/Exterior" style={linkStyles}>
-            Exterior
-          </Link>
-
-          {/* {email === "eiby" && (
-            
-          )} */}
-
-          {/* <Link to="/Ventas" style={linkStyles}>
-          Ventas
-        </Link> */}
+          <IconButton onClick={() => navigate(-1)} aria-label="back">
+            <ArrowBackIcon />
+          </IconButton>
+          <h2 style={{ marginLeft: theme.spacing(2) }}>{texto}</h2>
         </div>
-      </Toolbar>
-    </AppBar>
+      )}
+    </>
   );
 };
 
-export default Cabezal;
+export default React.memo(Cabezal);

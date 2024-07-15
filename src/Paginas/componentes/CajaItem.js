@@ -4,16 +4,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { extract } from "../../ayuda";
 
-function CajaItem({ dats, venta }) {
+function CajaItem({ dats, valor }) {
   const navigate = useNavigate();
   const theme = createTheme(); // Create a theme instance
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [data, setData] = useState(dats);
 
   const handleClick = (codigo, context) => {
-    venta
-      ? navigate(`/Ventas/Detalles/${codigo}`)
-      : navigate(`/Exterior/Detalles/${codigo}/${context}`);
+    navigate(`/${valor}/Detalles/${codigo}/${context}`);
+
     // Navigate to the details page with codigo and context as URL parameters
   };
 

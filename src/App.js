@@ -27,6 +27,18 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const logout = () => {
+    console.log("hla");
+    signOut(auth)
+      .then(() => {
+        console.log("User signed out");
+        setUser(null);
+      })
+      .catch((error) => {
+        console.error("Error signing out: ", error);
+      });
+  };
+
   if (loading) {
     // You can return a loading spinner or null here
     return null;
@@ -36,8 +48,7 @@ function App() {
     <div>
       {user ? (
         <>
-          <Cabezal email={user.email} />
-          <Routing email={user.email} />
+          <Routing email={user.email} logout={logout} />
         </>
       ) : (
         <Login />

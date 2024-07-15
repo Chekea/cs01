@@ -6,8 +6,9 @@ import {
   Typography,
   Container,
   CssBaseline,
-  Checkbox,
+  CircularProgress,
   FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 import {
   signInWithEmailAndPassword,
@@ -21,11 +22,13 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(false); // State to manage loading state
 
   const auth = getAuth(app);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true); // Start loading
 
     try {
       // Attempt to sign in with email and password
@@ -39,12 +42,6 @@ const Login = () => {
       console.log("Login successful for user:", user.email);
 
       // If keepLoggedIn is true, you might want to use Firebase's persistence
-      // This is optional and depends on your app's requirements
-      if (keepLoggedIn) {
-        await auth.setPersistence(auth.Auth.Persistence.LOCAL);
-      } else {
-        await auth.setPersistence(auth.Auth.Persistence.SESSION);
-      }
 
       // Handle successful login (e.g., redirect to dashboard)
       // You might want to use React Router or your preferred navigation method here
@@ -54,6 +51,8 @@ const Login = () => {
       // Handle login errors (e.g., display error message to user)
       // You might want to set an error state and display it in your component
       // setError(error.message);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -77,7 +76,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label="Correo Electronico"
+            label="Correo Electrónico"
             name="email"
             autoComplete="email"
             autoFocus
@@ -89,7 +88,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label="Contrasexa"
+            label="Contraseña"
             type="password"
             id="password"
             autoComplete="current-password"
@@ -102,9 +101,15 @@ const Login = () => {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={loading} // Disable button while loading
           >
             Entrar
           </Button>
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+              <CircularProgress />
+            </Box>
+          )}
         </Box>
       </Box>
     </Container>

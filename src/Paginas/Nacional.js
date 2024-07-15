@@ -4,63 +4,41 @@ import Chip from "@mui/material/Chip";
 import {
   getDatabase,
   ref,
-  onValue,
   query,
   orderByChild,
   equalTo,
   limitToLast,
-  update,
-  runTransaction,
   get,
   endAt,
-  startAt,
 } from "firebase/database";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import app from "./../Servicios/firebases";
 import useNotificationListener, { analizar } from "../ayuda";
-import {
-  RemoveVaueDB,
-  decrementValue,
-  incrementValue,
-} from "../Servicios/DBservices";
-import { Button, IconButton } from "@mui/material";
+import { Button, useMediaQuery, useTheme } from "@mui/material";
+import Cabezal from "./componentes/Cabezal";
 
 const MemoizedCajaItem = memo(CajaItem);
 
 function Nacional({ email }) {
-  const [selectedChip, setSelectedChip] = useState(
-    email !== "eiby" ? "Enviado" : "Comprado"
-    // localStorage.getItem("selectedChip") ||
-  );
+  const [selectedChip, setSelectedChip] = useState("Comprado");
   const [loading, setLoading] = useState(true);
   const [endloading, setendloading] = useState(true);
-  const [ultimo, setultimo] = useState("");
-
+  const [data, setData] = useState([]);
   const divRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const database = getDatabase(app);
 
-  const [data, setData] = useState(
-    []
-    // JSON.parse(localStorage.getItem("data")) || []
-  );
   const handleChipClick = useCallback(
     (chipValue) => {
       setData([]);
       setLoading(true);
 
       if (selectedChip !== chipValue) {
-        console.log(chipValue, selectedChip);
-        let a = selectedChip;
         setSelectedChip(chipValue);
         fetchData("", chipValue);
-
-        // if (data.length !== 0) {
-        //   localStorage.setItem(`a${a}`, JSON.stringify(data));
-        //   console.log("dentreo", chipValue);
-        //   checkfetch(chipValue);
-        // }
       }
     },
     [selectedChip]
@@ -68,20 +46,25 @@ function Nacional({ email }) {
 
   const fetchData = (codigo, estado) => {
     const databaseRef = ref(database, "GE/Compras/Nacional");
+
     let queryRef;
 
     if (data.length !== 0) {
-      console.log("volvio 0");
-
-      queryRef = query(
-        databaseRef,
-        orderByChild("Codigo"),
-        endAt(codigo),
-        limitToLast(6)
-      );
+      if (email === "nawetin@gmail.com") {
+        queryRef = query(
+          databaseRef,
+          orderByChild("Estado"),
+          equalTo("Enviado")
+        );
+      } else {
+        queryRef = query(
+          databaseRef,
+          orderByChild("Codigo"),
+          endAt(codigo),
+          limitToLast(6)
+        );
+      }
     } else {
-      console.log("volvio 1");
-
       queryRef = query(databaseRef, limitToLast(16));
     }
 
@@ -92,14 +75,11 @@ function Nacional({ email }) {
           const childData = childSnapshot.val();
           if (childData && !analizar(childData.Codigo, data)) {
             if (childData.Estado === estado) {
-              console.log(childData.Estado, "an");
-
               newData.unshift(childData);
             }
           }
         });
         if (data.length !== 0) {
-          console.log("mantenimiento");
           setData((old) => [...old, ...newData]);
         } else {
           setData(newData);
@@ -107,7 +87,6 @@ function Nacional({ email }) {
         setLoading(false);
 
         if (newData.length === 0) {
-          console.log("no existe");
           setendloading(false);
         }
       })
@@ -124,11 +103,7 @@ function Nacional({ email }) {
       divRef.current.scrollTop + divRef.current.clientHeight >=
       divRef.current.scrollHeight
     ) {
-      console.log("end reach");
-
       fetchData(valor.Codigo, selectedChip);
-    } else {
-      console.log("not reached!");
     }
   }, [data.length]);
 
@@ -156,11 +131,14 @@ function Nacional({ email }) {
         padding: 8,
         overflowY: "auto",
         height: "95vh",
-        paddingTop: "65px",
+        marginTop: isMobile ? 65 : 5,
+        paddingTop: "10px",
       }}
       ref={divRef}
     >
-      {email !== "eiby" && (
+      <Cabezal texto={"Nacional"} />
+
+      {email !== "nawetin@gmail.com" && (
         <div>
           <Chip
             label="Comprado"
@@ -186,7 +164,7 @@ function Nacional({ email }) {
         </div>
       )}
 
-      <div style={{ marginTop: 10 }}>
+      <div>
         {loading ? (
           <div
             style={{
@@ -199,7 +177,7 @@ function Nacional({ email }) {
             <CircularProgress />
           </div>
         ) : (
-          <MemoizedCajaItem dats={data} venta={false} />
+          <MemoizedCajaItem dats={data} venta={false} valor="Nacional" />
         )}
       </div>
     </div>
