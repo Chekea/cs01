@@ -94,7 +94,12 @@ function Exterior() {
   }, []); // Empty dependency array means this effect runs once after the component mounts
 
   return (
-    <div style={{ marginTop: isMobile ? 65 : 10 }}>
+    <div
+      style={{
+        marginTop: isMobile ? 65 : 10,
+        scrollBehavior: "smooth", // Added for smooth scroll
+      }}
+    >
       <Cabezal texto={"Exterior"} />
       {loading ? (
         <div

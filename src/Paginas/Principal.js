@@ -34,7 +34,15 @@ const Principal = ({ email, logout }) => {
   return (
     <Grid container spacing={2} padding={5}>
       <div style={{ position: "fixed", bottom: 20, right: 25 }}>
-        <button onClick={logout}>Cerrar Session {email}</button>
+        <button
+          onClick={() => {
+            if (window.confirm("Are you sure you want to log out?")) {
+              logout();
+            }
+          }}
+        >
+          Cerrar Sesión {email}
+        </button>
       </div>
       {filteredItems.map((item, index) => (
         <Grid item xs={6} sm={6} md={4} lg={3} key={index} display="flex">
@@ -49,7 +57,7 @@ const Principal = ({ email, logout }) => {
               justifyContent: "center",
               alignItems: "center",
               width: "100%",
-              maxWidth: "150px",
+              maxWidth: "100px",
               height: "150px",
               borderRadius: "10px",
             }}

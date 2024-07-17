@@ -132,7 +132,7 @@ const Search = () => {
           />
         ))}
         <TextField
-          label="Enter your search query"
+          label="Nombre del Producto"
           variant="outlined"
           fullWidth
           value={buscar}
@@ -147,9 +147,11 @@ const Search = () => {
         >
           Buscar
         </Button>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Resultados
-        </Typography>
+        {carddata.length > 0 && (
+          <Typography variant="h5" component="h2" gutterBottom>
+            Resultados
+          </Typography>
+        )}
         <ProductosCard
           data={carddata}
           enviado={() => console.log("Eiby")}

@@ -21,7 +21,7 @@ import app from "../../Servicios/firebases";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false); // State to manage loading state
 
   const auth = getAuth(app);
@@ -32,9 +32,23 @@ const Login = () => {
 
     try {
       // Attempt to sign in with email and password
+      let dato;
+      switch (email) {
+        case "chekeagroup":
+          dato = "chekeagroup@gmail.com";
+          break;
+        case "eibybielo":
+          dato = "eibybielo@gmail.com";
+          break;
+        case "nawetin":
+          dato = "nawetin@gmail.com";
+          break;
+        default:
+          throw new Error("Correo inexistente");
+      }
       const userCredential = await signInWithEmailAndPassword(
         auth,
-        email,
+        dato,
         password
       );
       const user = userCredential.user;
@@ -47,7 +61,30 @@ const Login = () => {
       // You might want to use React Router or your preferred navigation method here
       // history.push('/dashboard');
     } catch (error) {
-      console.error("Error signing in:", error.message);
+      setError(error.message);
+
+      switch (error.code) {
+        case "auth/invalid-email":
+          setError("Correo Invalido");
+
+          break;
+        case "auth/user-disabled":
+          setError("Correo Bloqueado");
+
+          break;
+        case "auth/user-not-found":
+          setError("Correo Inexistente");
+
+          break;
+        case "auth/wrong-password":
+          setError("Contrasexa equivocada");
+          break;
+        case "auth/network-request-failed":
+          setError("Error de Network");
+          break;
+        default:
+          setError("Error ");
+      }
       // Handle login errors (e.g., display error message to user)
       // You might want to set an error state and display it in your component
       // setError(error.message);
@@ -110,6 +147,9 @@ const Login = () => {
               <CircularProgress />
             </Box>
           )}
+          <Typography component="h1" color={"red"} variant="h5">
+            {error}
+          </Typography>
         </Box>
       </Box>
     </Container>

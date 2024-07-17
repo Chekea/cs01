@@ -571,6 +571,7 @@ const DetallesCompra = () => {
                 <Box
                   sx={{
                     display: "flex",
+                    paddingTop: 5,
                     justifyContent: "center",
                   }}
                 >

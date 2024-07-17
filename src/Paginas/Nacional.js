@@ -15,7 +15,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 
 import app from "./../Servicios/firebases";
 import useNotificationListener, { analizar } from "../ayuda";
-import { Button, useMediaQuery, useTheme } from "@mui/material";
+import { Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Cabezal from "./componentes/Cabezal";
 
 const MemoizedCajaItem = memo(CajaItem);
@@ -132,6 +132,7 @@ function Nacional({ email }) {
         overflowY: "auto",
         height: "95vh",
         marginTop: isMobile ? 65 : 5,
+        scrollBehavior: "smooth", // Added for smooth scroll
         paddingTop: "10px",
       }}
       ref={divRef}
@@ -176,8 +177,12 @@ function Nacional({ email }) {
           >
             <CircularProgress />
           </div>
-        ) : (
+        ) : data.length > 0 ? (
           <MemoizedCajaItem dats={data} venta={false} valor="Nacional" />
+        ) : (
+          <Typography variant="subtitle1" gutterBottom>
+            SIN DATOS
+          </Typography>
         )}
       </div>
     </div>

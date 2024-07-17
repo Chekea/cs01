@@ -492,7 +492,11 @@ const Publicar = () => {
       )}
 
       {view !== "" && (
-        <Box component="form" onSubmit={handleSubmit} sx={{ padding: 2 }}>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ padding: 2, paddingTop: 8 }}
+        >
           {view === "Exterior" && (
             <div style={{ margin: 10 }}>
               {chipOptions1.map((option) => (
