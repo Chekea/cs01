@@ -10,13 +10,13 @@ import {
 const Alert = ({ open, message, onClose, onConfirm }) => {
   return (
     <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Alert</DialogTitle>
+      <DialogTitle>AVISO!!</DialogTitle>
       <DialogContent>
         <p>{message}</p>
       </DialogContent>
       <DialogActions>
         <Button onClick={onConfirm} variant="contained" color="primary">
-          Confirm
+          Confirmar
         </Button>
         <Button onClick={onClose} variant="contained" color="secondary">
           Cancel

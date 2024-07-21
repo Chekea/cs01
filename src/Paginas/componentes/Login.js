@@ -34,13 +34,13 @@ const Login = () => {
       // Attempt to sign in with email and password
       let dato;
       switch (email) {
-        case "chekeagroup":
+        case "chekeagroup" || "Chekeagroup":
           dato = "chekeagroup@gmail.com";
           break;
-        case "eibybielo":
+        case "eibybielo" || "Eibybielo":
           dato = "eibybielo@gmail.com";
           break;
-        case "nawetin":
+        case "nawetin" || "Nawetin":
           dato = "nawetin@gmail.com";
           break;
         default:

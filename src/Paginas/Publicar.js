@@ -697,12 +697,12 @@ const Publicar = () => {
                 ))}
               </Box>
             </Grid>
-            <div
-              style={{
-                display: "flex",
-                alignContent: "center",
-                alignItems: "center",
-              }}
+            <Grid
+              item
+              xs={12}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
             >
               <Button type="submit" variant="contained" color="primary">
                 {loading ? (
@@ -711,7 +711,7 @@ const Publicar = () => {
                   "PUBLICAR"
                 )}
               </Button>
-            </div>
+            </Grid>
           </Grid>
         </Box>
       )}

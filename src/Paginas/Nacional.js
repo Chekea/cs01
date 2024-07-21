@@ -21,7 +21,12 @@ import Cabezal from "./componentes/Cabezal";
 const MemoizedCajaItem = memo(CajaItem);
 
 function Nacional({ email }) {
-  const [selectedChip, setSelectedChip] = useState("Comprado");
+  const [selectedChip, setSelectedChip] = useState(() => {
+    return (
+      localStorage.getItem("selectedChip") ||
+      (email === "nawetin@gmail.com" ? "Enviado" : "Comprado")
+    );
+  });
   const [loading, setLoading] = useState(true);
   const [endloading, setendloading] = useState(true);
   const [data, setData] = useState([]);
@@ -35,6 +40,7 @@ function Nacional({ email }) {
     (chipValue) => {
       setData([]);
       setLoading(true);
+      localStorage.setItem("selectedChip", chipValue);
 
       if (selectedChip !== chipValue) {
         setSelectedChip(chipValue);
@@ -50,22 +56,25 @@ function Nacional({ email }) {
     let queryRef;
 
     if (data.length !== 0) {
+      queryRef = query(
+        databaseRef,
+        orderByChild("Codigo"),
+        endAt(codigo),
+        limitToLast(6)
+      );
+    } else {
       if (email === "nawetin@gmail.com") {
         queryRef = query(
           databaseRef,
           orderByChild("Estado"),
           equalTo("Enviado")
         );
+        console.log(queryRef, "manito");
       } else {
-        queryRef = query(
-          databaseRef,
-          orderByChild("Codigo"),
-          endAt(codigo),
-          limitToLast(6)
-        );
+        console.log(queryRef, "a");
+
+        queryRef = query(databaseRef, limitToLast(16));
       }
-    } else {
-      queryRef = query(databaseRef, limitToLast(16));
     }
 
     get(queryRef)
@@ -75,6 +84,7 @@ function Nacional({ email }) {
           const childData = childSnapshot.val();
           if (childData && !analizar(childData.Codigo, data)) {
             if (childData.Estado === estado) {
+              console.log(childData);
               newData.unshift(childData);
             }
           }
