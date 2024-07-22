@@ -51,8 +51,8 @@ const Principal = ({ email, logout }) => {
         onConfirm={handleConfirm}
       />
       <div style={{ position: "fixed", bottom: 20, right: 25 }}>
-        <button style={{ padding: 5 }} onClick={() => handleOpen()}>
-          Cerrar Sesión {email}
+        <button style={{ padding: 15 }} onClick={() => handleOpen()}>
+          Cerrar Sesión
         </button>
       </div>
       {filteredItems.map((item, index) => (

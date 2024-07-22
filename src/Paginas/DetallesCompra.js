@@ -57,27 +57,29 @@ const DetallesCompra = () => {
     const appUrl = `whatsapp://send?phone=${phoneNumber}&text=${encodeURIComponent(
       message
     )}`;
-    const webUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
-      message
-    )}`;
 
-    // Create a temporary link to test the app URL scheme
-    const tempLink = document.createElement("a");
-    tempLink.href = appUrl;
-    tempLink.style.display = "none";
-    document.body.appendChild(tempLink);
+    // Function to detect if the user is on a mobile device
+    const isMobileDevice = () => {
+      return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    };
 
-    // Attempt to open the WhatsApp app
-    tempLink.click();
+    if (isMobileDevice()) {
+      // Create a temporary link to test the app URL scheme
+      const tempLink = document.createElement("a");
+      tempLink.href = appUrl;
+      tempLink.style.display = "none";
+      document.body.appendChild(tempLink);
 
-    // Fallback to the web version if the app is not installed
-    setTimeout(() => {
-      // Check if the visibility state is still visible
-      if (document.visibilityState === "visible") {
-        window.open(webUrl, "_blank");
-      }
-      document.body.removeChild(tempLink);
-    }, 500);
+      // Attempt to open the WhatsApp app
+      tempLink.click();
+
+      // Remove the temporary link
+      setTimeout(() => {
+        document.body.removeChild(tempLink);
+      }, 500);
+    } else {
+      alert("Please use a mobile device to send the WhatsApp message.");
+    }
   };
 
   // Example button to trigger the function

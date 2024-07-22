@@ -32,19 +32,16 @@ const Login = () => {
 
     try {
       // Attempt to sign in with email and password
+
       let dato;
-      switch (email) {
-        case "chekeagroup" || "Chekeagroup":
-          dato = "chekeagroup@gmail.com";
-          break;
-        case "eibybielo" || "Eibybielo":
-          dato = "eibybielo@gmail.com";
-          break;
-        case "nawetin" || "Nawetin":
-          dato = "nawetin@gmail.com";
-          break;
-        default:
-          throw new Error("Correo inexistente");
+      if (email.toLowerCase() === "chekeagroup") {
+        dato = "chekeagroup@gmail.com";
+      } else if (email.toLowerCase() === "eibybielo") {
+        dato = "eibybielo@gmail.com";
+      } else if (email.toLowerCase() === "nawetin") {
+        dato = "nawetin@gmail.com";
+      } else {
+        throw new Error("Correo inexistente");
       }
       const userCredential = await signInWithEmailAndPassword(
         auth,
