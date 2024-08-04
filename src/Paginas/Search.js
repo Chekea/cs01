@@ -21,6 +21,7 @@ import {
 import app from "../Servicios/firebases";
 import ProductosCard from "./componentes/ProductosCard";
 import Cabezal from "./componentes/Cabezal";
+import { capitalizeFirstLetter } from "../ayuda";
 
 const Search = () => {
   const [buscar, setBuscar] = useState("");
@@ -64,13 +65,6 @@ const Search = () => {
     // Save state to sessionStorage
     sessionStorage.setItem("results", JSON.stringify(results));
   }, [results]);
-
-  const capitalizeFirstLetter = (str) => {
-    if (typeof str !== "string" || str.length === 0) {
-      return str;
-    }
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  };
 
   const handleSearch = async () => {
     setcarddata([]);

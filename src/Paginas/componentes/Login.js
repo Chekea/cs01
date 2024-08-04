@@ -41,6 +41,7 @@ const Login = () => {
       } else if (email.toLowerCase() === "nawetin") {
         dato = "nawetin@gmail.com";
       } else {
+        
         throw new Error("Correo inexistente");
       }
       const userCredential = await signInWithEmailAndPassword(

@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { get, ref, getDatabase, push, set, update } from "firebase/database";
-import { analizar } from "../ayuda";
+import { analizar, capitalizeFirstLetter } from "../ayuda";
 import app from "./../Servicios/firebases";
 import {
   getStorage,
@@ -103,7 +103,8 @@ const Publicar = () => {
   const database = getDatabase(app);
   const storage = getStorage(app);
 
-  const handleTitleChange = (e) => setTitle(e.target.value);
+  const handleTitleChange = (e) =>
+    setTitle(capitalizeFirstLetter(e.target.value));
   const handlePriceChange = (e) => setPrice(e.target.value);
   const handleDimension = (e) => setDimension(e.target.value);
   const handleEspacio = (e) => setEspacio(e.target.value);
@@ -265,7 +266,7 @@ const Publicar = () => {
         let updates = {};
         updates[`GE/${view}/Prod/${codigo}`] = data;
         updates[`GE/Filtros/${view}/${selectedChip1}/${codigo}`] = data;
-        updates[`GE/Prod/${vendedor}/${codigo}`] = data;
+        updates[`GE/Vendedores/${vendedor}/Prod/${codigo}`] = data;
         await update(ref(database), updates);
 
         // Add colors to the updates

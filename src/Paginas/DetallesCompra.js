@@ -50,7 +50,6 @@ const DetallesCompra = () => {
   const handleOpen = (object) => {
     setOpen(true);
   };
-  console.log(data.Codigo);
   const sendWhatsAppMessage = () => {
     const phoneNumber = `+8613212074721`; // Replace with the target phone number
     const message = `Buenas, se necesita verificacion para que Chekea envie su compra ${data.CompraId} , basta con responder con un OK`; // Replace with your message
