@@ -7,9 +7,11 @@ const items = [
   { name: "Compras", link: "/Nacional" },
   { name: "Exterior", link: "/Exterior" },
   { name: "Buscar", link: "/Buscar" },
-  { name: "Contabilidad", link: "/Contabilidad" },
+  { name: "P2P Vuelos", link: "/Contabilidad" },
   { name: "Publicar", link: "/Publicar" },
-  { name: "Otros", link: "/" },
+  { name: "Farmacias", link: "/Farmacias" },
+  { name: "Comentarios", link: "/Comentario" },
+  { name: "Solicitar", link: "/Solicitar" },
 ];
 
 const colors = ["#FFCDD2", "#C8E6C9", "#BBDEFB", "#FFECB3"];

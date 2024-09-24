@@ -130,10 +130,10 @@ const Publicar = () => {
       })
     );
 
-    if (compressedFiles.length + images.length <= 5) {
+    if (compressedFiles.length + images.length < 10) {
       setImages([...images, ...compressedFiles]);
     } else {
-      alert("You can upload up to 5 images only.");
+      alert("You can upload up to 9 images only.");
     }
   };
 
@@ -420,6 +420,35 @@ const Publicar = () => {
 
   useEffect(() => {
     if (view !== "") {
+      async function getUniqueSubcategories() {
+        const databaseRef = ref(
+          database,
+          `GE/Filtros/Exterior/Belleza & Accesorios`
+        );
+        const subcategoriesSet = new Set();
+
+        try {
+          const snapshot = await get(databaseRef);
+          if (snapshot.exists()) {
+            const products = snapshot.val();
+            for (const productId in products) {
+              if (products.hasOwnProperty(productId)) {
+                const product = products[productId];
+                if (product.Subcategoria) {
+                  subcategoriesSet.add(product.Subcategoria);
+                }
+              }
+            }
+          } else {
+            console.log("No data available");
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+
+        return Array.from(subcategoriesSet);
+      }
+
       const fetchData = (codigo, estado) => {
         const databaseRef = ref(database, `GE/Categorias/${view}`);
 

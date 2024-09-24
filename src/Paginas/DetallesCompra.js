@@ -733,6 +733,9 @@ const DetallesCompra = () => {
       {data.Contexto === "Nacional" && (
         <button onClick={sendWhatsAppMessage}>CONFIRMAR COMPRA </button>
       )}
+      <button onClick={sendWhatsAppMessage}>
+        PRE-DELIVERY NOTIFICATION // MENSAJE DIRECTO{" "}
+      </button>
     </div>
   );
 };

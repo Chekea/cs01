@@ -1,9 +1,6 @@
-import { getMessaging, getToken } from "firebase/messaging";
-import axios from "axios";
 
 import { useEffect } from "react";
 import { ref, onValue, off, increment } from "firebase/database";
-import app, { messaging } from "./Servicios/firebases";
 export const ColorMain = "";
 
 export const extract = (string) => {
@@ -14,25 +11,7 @@ export const extract = (string) => {
 export const lugar = (pais) =>
   pais === "Guinea Ecuatorial" ? "Nacional" : "Exterior";
 
-export const sendNotification = async (token, title, body) => {
-  try {
-    axios.post(
-      "http://localhost:5000/send-notification",
-      {
-        token: token,
-        title: "Hello",
-        body: "This is a notification",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-  } catch (error) {
-    console.error("Error sending notification:", error);
-  }
-};
+export const sendNotification = async (token, title, body) => {};
 
 // Function to send notification
 

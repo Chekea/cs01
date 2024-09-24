@@ -474,6 +474,78 @@ const EditarPost = () => {
     }
   };
 
+  const addToDbnow = async () => {
+    const data = {
+      "Belleza & Accesorios": {
+        "-NS9e64QfGc99Jc_Fkk7": { seccion: "Maquillaje" },
+        "-NS9e64QfGc99Jc_Fkk8": { seccion: "Pelos" },
+        "-NS9e64Rf7JA8mBOn6wG": { seccion: "Bisuteria" },
+        "-NS9e64Rf7JA8mBOn6wH": { seccion: "Perfumes" },
+        "-NS9e64Xcctl8nVsuKWu": { seccion: "Otros" },
+      },
+      "Complementos para Peques": {
+        "-NS9g6RRvtqI5WH4WTwZ": { seccion: "Recien nacidos" },
+        "-NS9g6RRvtqI5WH4WTw_": { seccion: "Juguetes" },
+        "-NS9g6RSV3bd_CVbQKVX": { seccion: "Moda" },
+        "-NS9g6RSV3bd_CVbQKVZ": { seccion: "Otros" },
+      },
+      Deporte: {
+        "-NSA1cIhfPCDV428idqX": { seccion: "Gymnasio" },
+        "-NSA1cIse-IvQWXtOMCS": { seccion: "Futbol" },
+        "-NSA1cIvpLdJk99TENHy": { seccion: "Baloncesto" },
+        "-NSA1cIvpLdJk99TENHz": { seccion: "Tenis" },
+        "-NSA1cIxzqZMWSaRb8c4": { seccion: "Prenda masculina" },
+        "-NSA1cIyv4fSfOphbY0-": { seccion: "Prenda femenina" },
+        "-NSA1cJCdzd0-qrSBPL9": { seccion: "Otros" },
+      },
+      Electronica: {
+        "-NS9eo9TVJunJzlqSZri": { seccion: "Tv & Ordenadores" },
+        "-NS9eo9TVJunJzlqSZrj": { seccion: "Telefonos & Auriculares" },
+        "-NS9eo9UtRvCVpd0MS1b": { seccion: "Aparatos de Musica" },
+        "-NS9eo9UtRvCVpd0MS1c": { seccion: "Maquinaria" },
+        "-NS9eo9VFHxNOLK0Kpsr": { seccion: "Otros" },
+      },
+      Hogar: {
+        "-NS9faIl2NgTsbRUEg20": { seccion: "Salon" },
+        "-NS9faIuMz9oDRMgouLq": { seccion: "Cocina" },
+        "-NS9faIuMz9oDRMgouLr": { seccion: "Baño" },
+        "-NS9faIvgsBdN5BjYynG": { seccion: "Terraza" },
+        "-NS9faIwU5xxurCuBpio": { seccion: "Otros" },
+      },
+      "Moda & Accesorios": {
+        Femenina: {
+          "-NS9t9xNIarWxv36Wxjo": { seccion: "Calzado" },
+          "-NS9t9xUPusKEWyd-KnH": { seccion: "Faldas" },
+          "-NS9t9xVwOKeJVgS5ce2": { seccion: "Pantalones" },
+          "-NS9t9xXg3D8VsniJzoc": { seccion: "Trajes" },
+          "-NS9t9xYiJDWbtfFYSZ2": { seccion: "Vestidos" },
+          "-NS9t9xYiJDWbtfFYSZ3": { seccion: "Camisas" },
+          "-NS9t9xYiJDWbtfFYSZ4": { seccion: "Otros" },
+          "-NjpV80g8iSHWmx7yaoq": { seccion: "Bolsos" },
+        },
+        Masculina: {
+          "-NS9tUQe3_k2UXHRRGaQ": { seccion: "Calzado" },
+          "-NS9tUQe3_k2UXHRRGaR": { seccion: "Camisas" },
+          "-NS9tUQf57FIQ_xdx_9O": { seccion: "Pantalones" },
+          "-NS9tUQf57FIQ_xdx_9P": { seccion: "Trajes" },
+          "-NS9tUQf57FIQ_xdx_9Q": { seccion: "Relojes" },
+          "-NS9tUQgBCuZ3J-jHSXG": { seccion: "Sombreros" },
+          "-NS9tUQgBCuZ3J-jHSXH": { seccion: "Otros" },
+        },
+      },
+    };
+
+    // Reference to your database path
+    const dbRef = ref(database, `GE/Secciones/Nacional`);
+    const databaseRef2 = ref(database, `GE/Secciones/Exterior`);
+
+    // try {
+    // //   // Update the node
+    // Set the data
+    await update(dbRef, data);
+    await update(databaseRef2, data);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // setLoading(true); // Start loading

@@ -5,9 +5,9 @@
   "version": "0.1.0",
   
   "private": true,
+  
   "homepage": ".",
-  
-  
+
   "dependencies": {
   
     
@@ -79,14 +79,16 @@
   },
   
   "scripts": {
-  "predeploy": "npm run build",
-  "deploy": "gh-pages -d build",
+  
+   
     
   "start": "GENERATE_SOURCEMAP=false react-scripts start",
-  "build": "GENERATE_SOURCEMAP=false react-scripts build",
- 
   
     
+  "build": "GENERATE_SOURCEMAP=false react-scripts build",
+  
+    "predeploy": "npm run build",
+  "deploy": "gh-pages -d build",
   "test": "react-scripts test",
   
     
@@ -99,7 +101,7 @@
   "dev": "concurrently \"npm run start\" \"npm run server\""
   
   },
-  
+
   "eslintConfig": {
   
     

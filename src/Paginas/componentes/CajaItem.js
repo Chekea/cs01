@@ -10,8 +10,8 @@ function CajaItem({ dats, valor }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [data, setData] = useState(dats);
 
-  const handleClick = (codigo, context) => {
-    navigate(`/${valor}/Detalles/${codigo}/${context}`);
+  const handleClick = (codigo) => {
+    navigate(`/${valor}/Detalles/${codigo}`);
 
     // Navigate to the details page with codigo and context as URL parameters
   };
