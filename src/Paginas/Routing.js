@@ -1,5 +1,11 @@
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  BrowserRouter,
+  Outlet,
+} from "react-router-dom";
 import { useMediaQuery, CircularProgress, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Principal from "./Principal";
@@ -54,7 +60,7 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Routing component with memoization
+// Main routing component
 export const Routing = React.memo(({ email, logout }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -62,30 +68,43 @@ export const Routing = React.memo(({ email, logout }) => {
   return (
     <ErrorBoundary>
       <Suspense fallback={<Loader />}>
-        <Routes>
-          <Route
-            path="/"
-            element={<Principal email={email} logout={logout} />}
-          />
-          <Route path="/Publicar" element={<Publicar />} />
-          <Route path="/Nacional" element={<Nacional email={email} />} />
-          <Route path="/Contabilidad" element={<Travel />} />
-          <Route path="/Farmacias" element={<Pharmacies />} />
-          <Route path="/Exterior" element={<Exterior />} />
-          <Route path="/FeedBack" element={<FeedBack />} />
-          <Route path="/Buscar" element={<Search />} />
-          <Route
-            path="/Buscar/Editar/:codigo/:contexto"
-            element={<EditarPost />}
-          />
-          <Route
-            path="/:contexto/Detalles/:codigo"
-            element={<DetallesCompra />}
-          />
-          <Route path="*" element={<Navigate to="/" />} />{" "}
-          {/* Redirect unknown routes */}
-        </Routes>
+        {/* Single BrowserRouter for the entire app */}
+        <BrowserRouter basename="/Prueba">
+          <Routes>
+            <Route path="/" element={<Layout email={email} logout={logout} />}>
+              <Route
+                index
+                element={<Principal email={email} logout={logout} />}
+              />
+              <Route path="Publicar" element={<Publicar />} />
+              <Route path="Nacional" element={<Nacional email={email} />} />
+              <Route path="Contabilidad" element={<Travel />} />
+              <Route path="Farmacias" element={<Pharmacies />} />
+              <Route path="Exterior" element={<Exterior />} />
+              <Route path="FeedBack" element={<FeedBack />} />
+              <Route path="Buscar" element={<Search />} />
+              <Route
+                path="Buscar/Editar/:codigo/:contexto"
+                element={<EditarPost />}
+              />
+              <Route
+                path=":contexto/Detalles/:codigo"
+                element={<DetallesCompra />}
+              />
+              <Route path="*" element={<Navigate to="/" />} />{" "}
+              {/* Redirect unknown routes */}
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </Suspense>
     </ErrorBoundary>
   );
 });
+
+// Layout component to hold common layout and nested routes
+const Layout = ({ email, logout }) => (
+  <div>
+    {/* Common layout components like header, footer, etc. */}
+    <Outlet /> {/* This renders the nested routes */}
+  </div>
+);
