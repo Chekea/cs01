@@ -10,8 +10,6 @@ const items = [
   { name: "P2P Vuelos", link: "/Contabilidad" },
   { name: "Publicar", link: "/Publicar" },
   { name: "Farmacias", link: "/Farmacias" },
-  { name: "Comentarios", link: "/Comentario" },
-  { name: "Solicitar", link: "/Solicitar" },
 ];
 
 const colors = ["#FFCDD2", "#C8E6C9", "#BBDEFB", "#FFECB3"];

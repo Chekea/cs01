@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { ref, onValue, off, increment } from "firebase/database";
 export const ColorMain = "";

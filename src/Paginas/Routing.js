@@ -4,12 +4,15 @@ import {
   Route,
   Navigate,
   BrowserRouter,
+  HashRouter,
   Outlet,
 } from "react-router-dom";
 import { useMediaQuery, CircularProgress, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Principal from "./Principal";
 import FeedBack from "./componentes/FeedBack";
+import Pagos from "./componentes/Pagos";
+import Succes from "./componentes/Succes";
 
 // Lazy loading components
 const Nacional = lazy(() => import("./Nacional"));
@@ -61,41 +64,40 @@ class ErrorBoundary extends React.Component {
 }
 
 // Main routing component
-export const Routing = React.memo(({ email, logout }) => {
+export const Routing = React.memo(() => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <ErrorBoundary>
       <Suspense fallback={<Loader />}>
-        {/* Single BrowserRouter for the entire app */}
-        <BrowserRouter basename="/Prueba">
+        {/* Single HashRouter for the entire app */}
+        <HashRouter>
           <Routes>
-            <Route path="/" element={<Layout email={email} logout={logout} />}>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Principal />} />
+              <Route path="/Publicar" element={<Publicar />} />
+              <Route path="/Nacional" element={<Nacional />} />
+              <Route path="/Contabilidad" element={<Travel />} />
+              <Route path="/Farmacias" element={<Pharmacies />} />
+              <Route path="/Exterior" element={<Exterior />} />
+              <Route path="/FeedBack" element={<FeedBack />} />
+              <Route path="/Pagos" element={<Pagos />} />
+              <Route path="/Pagos/Success" element={<Succes />} />
+              <Route path="/Buscar" element={<Search />} />
               <Route
-                index
-                element={<Principal email={email} logout={logout} />}
-              />
-              <Route path="Publicar" element={<Publicar />} />
-              <Route path="Nacional" element={<Nacional email={email} />} />
-              <Route path="Contabilidad" element={<Travel />} />
-              <Route path="Farmacias" element={<Pharmacies />} />
-              <Route path="Exterior" element={<Exterior />} />
-              <Route path="FeedBack" element={<FeedBack />} />
-              <Route path="Buscar" element={<Search />} />
-              <Route
-                path="Buscar/Editar/:codigo/:contexto"
+                path="/Buscar/Editar/:codigo/:contexto"
                 element={<EditarPost />}
               />
               <Route
-                path=":contexto/Detalles/:codigo"
+                path="/:contexto/Detalles/:codigo"
                 element={<DetallesCompra />}
               />
               <Route path="*" element={<Navigate to="/" />} />{" "}
               {/* Redirect unknown routes */}
             </Route>
           </Routes>
-        </BrowserRouter>
+        </HashRouter>
       </Suspense>
     </ErrorBoundary>
   );
