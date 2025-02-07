@@ -1,12 +1,16 @@
 import React, { useEffect } from "react";
 import { Box, Typography } from "@mui/material";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CustomText from "./CustomText";
 
 const Succes = () => {
   useEffect(() => {
     // Send data to WebView when the page loads
     window.ReactNativeWebView?.postMessage(
-      JSON.stringify({ message: "Compra realizada con éxito", amount: 1995.4 })
+      JSON.stringify({
+        message: "Compra realizada con éxito",
+        notificacion: true,
+      })
     );
   }, []);
 
@@ -23,12 +27,14 @@ const Succes = () => {
       }}
     >
       <CheckCircleOutlineIcon sx={{ fontSize: 80, color: "green", mb: 2 }} />
-      <Typography variant="h4" gutterBottom>
-        Compra Realizada!
-      </Typography>
-      <Typography variant="body1" color="textSecondary" sx={{ mb: 4 }}>
-        Gracias por confiar en Chekea
-      </Typography>
+      <CustomText text={"Compra Realizada!"} size={"h4"} />
+
+      <CustomText
+        text={"Gracias por confiar en Chekea"}
+        colores={"textSecondary"}
+      />
+
+    
     </Box>
   );
 };

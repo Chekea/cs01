@@ -17,15 +17,13 @@ import app from "./../Servicios/firebases";
 import useNotificationListener, { analizar } from "../ayuda";
 import { Button, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Cabezal from "./componentes/Cabezal";
+import axios from "axios"; // Import Axios
 
 const MemoizedCajaItem = memo(CajaItem);
 
 function Nacional({ email }) {
   const [selectedChip, setSelectedChip] = useState(() => {
-    return (
-      localStorage.getItem("selectedChip") ||
-      (email === "nawetin@gmail.com" ? "Enviado" : "Comprado")
-    );
+    return localStorage.getItem("selectedChip");
   });
   const [loading, setLoading] = useState(true);
   const [endloading, setendloading] = useState(true);
@@ -33,8 +31,6 @@ function Nacional({ email }) {
   const divRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const database = getDatabase(app);
 
   const handleChipClick = useCallback(
     (chipValue) => {
@@ -49,61 +45,42 @@ function Nacional({ email }) {
     },
     [selectedChip]
   );
-
-  const fetchData = (codigo, estado) => {
-    const databaseRef = ref(database, "GE/Compras/Nacional");
-
-    let queryRef;
-
-    if (data.length !== 0) {
-      queryRef = query(
-        databaseRef,
-        orderByChild("Codigo"),
-        endAt(codigo),
-        limitToLast(6)
+  const fetchData = async (codigo, estado) => {
+    try {
+      // Include estado as a parameter in the request
+      const response = await axios.get(
+        `http://localhost:3000/fetchWithPagination`,
+        {
+          params: {
+            path: `GE/Compras/Nacional`, // Adjust path if needed
+            estado: estado, // Add estado as a parameter
+            type: "collection", // Use type if needed
+          },
+        }
       );
-    } else {
-      if (email === "nawetin@gmail.com") {
-        queryRef = query(
-          databaseRef,
-          orderByChild("Estado"),
-          equalTo("Enviado")
-        );
-        console.log(queryRef, "manito");
-      } else {
-        console.log(queryRef, "a");
 
-        queryRef = query(databaseRef, limitToLast(16));
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
+
+      const fetchedData = response.data; // Get data from response
+
+      // Update state with the new data
+      setData(fetchedData);
+      console.log(fetchedData);
+
+      setLoading(false);
+
+      if (fetchedData.length === 0) {
+        setendloading(false);
       }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
+      setLoading(false);
     }
-
-    get(queryRef)
-      .then((snapshot) => {
-        const newData = [];
-        snapshot.forEach((childSnapshot) => {
-          const childData = childSnapshot.val();
-          if (childData && !analizar(childData.Codigo, data)) {
-            if (childData.Estado === estado) {
-              console.log(childData);
-              newData.unshift(childData);
-            }
-          }
-        });
-        if (data.length !== 0) {
-          setData((old) => [...old, ...newData]);
-        } else {
-          setData(newData);
-        }
-        setLoading(false);
-
-        if (newData.length === 0) {
-          setendloading(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setLoading(false);
-      });
   };
 
   const handleScroll = useCallback(() => {
@@ -128,12 +105,12 @@ function Nacional({ email }) {
   }, [handleScroll]);
 
   useEffect(() => {
-    fetchData("", selectedChip);
+    fetchData("", selectedChip); // Initial fetch
 
     return () => {
-      // Unsubscribe from database
+      // Unsubscribe from database if necessary
     };
-  }, []);
+  }, [selectedChip]);
 
   return (
     <div
@@ -142,7 +119,7 @@ function Nacional({ email }) {
         overflowY: "auto",
         height: "95vh",
         marginTop: isMobile ? 65 : 5,
-        scrollBehavior: "smooth", // Added for smooth scroll
+        scrollBehavior: "smooth",
         paddingTop: "10px",
       }}
       ref={divRef}

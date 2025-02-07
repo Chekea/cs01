@@ -6,19 +6,25 @@ import { makeStyles } from "@mui/styles";
 const useStyles = makeStyles({
   customStyle: {
     fontFamily: "CustomFont, Arial, sans-serif",
+    fontWeight: "regular",
+    fontSize: "1.3rem",
+  },
+  customStyle2: {
+    fontFamily: "CustomFont, Arial, sans-serif",
     fontWeight: "bold",
+    fontSize: "1.3rem",
   },
 });
-
 // Create the CustomTypography component
-function CustomText({ text, activo }) {
+function CustomText({ text, size, bold, top, bot, right, colores }) {
   const classes = useStyles();
 
   return (
     <Typography
-      variant="h6"
-      className={classes.customStyle}
-      gutterBottom={activo}
+      className={bold ? classes.customStyle2 : classes.customStyle}
+      gutterBottom
+      color={colores ? colores : null}
+      sx={{ mr: right ? right : null }}
     >
       {text}
     </Typography>

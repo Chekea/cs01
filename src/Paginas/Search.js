@@ -9,19 +9,11 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import {
-  endAt,
-  get,
-  getDatabase,
-  orderByChild,
-  query,
-  ref,
-  startAt,
-} from "firebase/database";
-import app from "../Servicios/firebases";
+
 import ProductosCard from "./componentes/ProductosCard";
 import Cabezal from "./componentes/Cabezal";
 import { capitalizeFirstLetter } from "../ayuda";
+import axios from "axios";
 
 const Search = () => {
   const [buscar, setBuscar] = useState("");
@@ -29,7 +21,6 @@ const Search = () => {
   const [carddata, setcarddata] = useState([]);
   const [chipscolor, setChipscolor] = useState(["Nacional", "Exterior"]);
   const [selectedChip1, setSelectedChip1] = useState(null);
-  const database = getDatabase(app);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -86,30 +77,33 @@ const Search = () => {
     }
   };
 
-  const fetchData = (startString, endString) => {
-    const databaseRef = query(
-      ref(database, `GE/${selectedChip1}/Prod/`),
-      orderByChild("Titulo"),
-      startAt(startString),
-      endAt(endString)
-    );
-
-    get(databaseRef)
-      .then((snapshot) => {
-        if (snapshot.exists()) {
-          const data = [];
-          snapshot.forEach((childSnapshot) => {
-            data.push(childSnapshot.val());
-          });
-          setcarddata((prevData) => [...prevData, ...data]);
-          setResults((prevData) => [...prevData, ...data]); // Update results state
-        } else {
-          console.log("No data available");
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
+  const fetchData = async (startString, endString) => {
+    try {
+      // Include estado as a parameter in the request
+      const response = await axios.get(`http://localhost:3000/search`, {
+        params: {
+          path: `GE/${selectedChip1}/Prod/`,
+          childkey: "Titulo",
+          startString: capitalizeFirstLetter(buscar),
+          endString: capitalizeFirstLetter(buscar),
+        },
       });
+
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
+
+      const fetchedData = response.data; // Get data from response
+      setcarddata(fetchedData);
+      setResults(fetchedData); // Update results state
+
+      // Update state with the new data
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
+    }
   };
 
   return (

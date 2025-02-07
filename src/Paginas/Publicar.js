@@ -12,15 +12,19 @@ import {
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import { get, ref, getDatabase, push, set, update } from "firebase/database";
-import { analizar, capitalizeFirstLetter } from "../ayuda";
+import { analizar, capitalizeFirstLetter, compressImage } from "../ayuda";
 import app from "./../Servicios/firebases";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+
 import Cabezal from "./componentes/Cabezal";
+import { subircompra, uploadImage } from "../Servicios/DBservices";
+import axios from "axios";
+import * as XLSX from "xlsx";
+import {
+  getDownloadURL,
+  getStorage,
+  ref as storageref,
+  uploadBytes,
+} from "firebase/storage";
 
 const ImagePreview = ({ file, onRemove, index }) => {
   const [src, setSrc] = useState("");
@@ -35,7 +39,6 @@ const ImagePreview = ({ file, onRemove, index }) => {
       };
     }
   }, [file]);
-
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
       {file ? (
@@ -88,20 +91,50 @@ const Publicar = () => {
   const [selectedChip, setSelectedChip] = useState("Aerea");
   const [selectedChip1, setSelectedChip1] = useState(null);
   const [selectedChip2, setSelectedChip2] = useState(null);
-  const [chipData, setChipData] = useState([]);
+  const [chips, setChips] = useState([]);
   const [showbox, setShowBox] = useState(true);
-
-  const [chipscolor, setChipscolor] = useState([]);
+  const [imgs, setimgs] = useState(null);
+  let categ = "Otros";
+  // const [chips, setChips] = useState([
+  //   "iPhone 11",
+  //   "iPhone 11 Pro",
+  //   "iPhone 11 Pro Max",
+  //   "iPhone 12",
+  //   "iPhone 12 Mini",
+  //   "iPhone 12 Pro",
+  //   "iPhone 12 Pro Max",
+  //   "iPhone 13",
+  //   "iPhone 13 Mini",
+  //   "iPhone 13 Pro",
+  //   "iPhone 13 Pro Max",
+  //   "iPhone 14",
+  //   "iPhone 14 Plus",
+  //   "iPhone 14 Pro",
+  //   "iPhone 14 Pro Max",
+  //   "iPhone 15",
+  //   "iPhone 15 Plus",
+  //   "iPhone 15 Pro",
+  //   "iPhone 15 Pro Max",
+  //   "iPhone 16",
+  //   "iPhone 16 Plus",
+  //   "iPhone 16 Pro",
+  //   "iPhone 16 Pro Max",
+  // ]);
   const [chipOptions, setchipOptions] = useState([]);
   const [chipOptionscat, setchipOptionscat] = useState([]);
 
-  const [chips, setChips] = useState([]);
+  const [chipscolor, setChipscolor] = useState([]);
   const [prices, setPrices] = useState({});
   const [inputValue, setInputValue] = useState("");
   const [inputValues, setInputValues] = useState("");
   const [view, setView] = useState("");
   const database = getDatabase(app);
   const storage = getStorage(app);
+  const pesin = 0.6;
+
+  const [file, setFile] = useState(null);
+  const [jsonData, setJsonData] = useState([]); // State para almacenar los datos JSON
+  const [columns, setColumns] = useState([]); // State para almacenar las columnas
 
   const handleTitleChange = (e) =>
     setTitle(capitalizeFirstLetter(e.target.value));
@@ -114,77 +147,20 @@ const Publicar = () => {
   const handleUbicacion = (e) => setUbicacion(e.target.value);
 
   const handleDetailsChange = (e) => setDetails(e.target.value);
-
-  const uploadImage = async (file) => {
-    const imageRef = storageRef(storage, `Imagenes/Nuevo/${Date.now()}.jpeg`);
-    await uploadBytes(imageRef, file);
-    return await getDownloadURL(imageRef);
-  };
-
-  const handleImageUpload = async (event) => {
+  const handleImageUpload = (event) => {
     const files = Array.from(event.target.files);
-    const compressedFiles = await Promise.all(
-      files.map(async (file) => {
-        const compressedFile = await compressImage(file);
-        return compressedFile;
-      })
-    );
 
-    if (compressedFiles.length + images.length < 10) {
-      setImages([...images, ...compressedFiles]);
+    if (files.length + images.length <= 9) {
+      files.forEach((file) => {
+        console.log(
+          `File: ${file.name}, Size: ${(file.size / 1024).toFixed(2)} KB`
+        );
+      });
+
+      setImages([...images, ...files]);
     } else {
       alert("You can upload up to 9 images only.");
     }
-  };
-
-  const compressImage = async (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const img = new Image();
-        img.src = reader.result;
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 1200; // Set the desired maximum width
-          const MAX_HEIGHT = 900;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height *= MAX_WIDTH / width;
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width *= MAX_HEIGHT / height;
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedFile = canvas.toDataURL("image/jpeg", 0.9); // Adjust the quality value (0.7 in this example)
-          resolve(dataURItoBlob(compressedFile));
-        };
-        img.onerror = (error) => reject(error);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
-  const dataURItoBlob = (dataURI) => {
-    const byteString = atob(dataURI.split(",")[1]);
-    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-    return new Blob([ab], { type: mimeString });
   };
 
   const handleRemoveImage = (index) => {
@@ -193,160 +169,186 @@ const Publicar = () => {
   const getCurrentTimeInMilliseconds = () => {
     return Date.now();
   };
-
+  // Main Submit Handler
   const handleSubmit = async (e) => {
-    if (selectedChip1 !== null && selectedChip2 !== null) {
-      e.preventDefault();
-      setLoading(true); // Start loading
+    e.preventDefault();
+    setLoading(true); // Start loading
 
-      let fecha = getCurrentTimeInMilliseconds();
+    let fecha = getCurrentTimeInMilliseconds();
 
-      try {
-        // Upload the first image and get its URL
-        const firstImageURL = await uploadImage(images[0]);
+    try {
+      // Generate new references and keys for the data
+      const newItemRef = push(ref(database, `GE/Exterior/Prod`));
+      const codigo = newItemRef.key;
 
-        // Generate new references and keys for the data
-        const newItemRef = push(ref(database, `GE/${view}/Prod`));
-        const codigo = newItemRef.key;
+      // Prepare common data object
+      const commonData = await prepareCommonData(codigo, fecha);
 
-        // Create the main data object
-        let data;
-        let vendedor =
-          view === "Exterior"
-            ? "C0y1aQsV5NZNLBuvprio3vXy2LR2"
-            : "kbJogy4k8gN7nSK2QUFXwMpXSXz1";
-        if (view === "Exterior") {
-          let espace = espacio !== "" ? espacio * 0.000001 : "";
-          data = {
-            Titulo: title,
-            Condicion: "Nuevo",
-            Categoria: selectedChip1,
-            Subcategoria: selectedChip2,
-            Codigo: codigo,
-            Precio: parseInt(price),
-            Envio: selectedChip,
-            Stock: true,
-            Descuento: 0,
-            Peso: dimension !== "" ? parseFloat(dimension) : 0,
-            Dimension: parseFloat(espace.toFixed(4)),
-            Ubicacion: ubicacion,
-            Pais: "China",
-            Detalles: details,
-            Imagen: firstImageURL,
-            Vistos: 0,
-            Duracion: "20-35 dias",
-            Vendedor: vendedor,
-            Compras: 0,
-            Fecha: fecha,
-          };
-        } else {
-          data = {
-            Titulo: title,
-            Condicion: "Nuevo",
-            Categoria: selectedChip1,
-            Cantidad: 0,
-            Subcategoria: selectedChip2,
-            Codigo: codigo,
-            Peso: dimension !== "" ? parseFloat(dimension) : 0,
-            Precio: parseInt(price),
-            Stock: false,
-            Descuento: 0,
-            Ubicacion: ubicacion,
-            Pais: "Guinea Ecuatorial",
-            Detalles: details,
-            Imagen: firstImageURL,
-            Vistos: 0,
-            Vendedor: vendedor,
-            Compras: 0,
-            Fecha: fecha,
-          };
-        }
+      // // Upload images to Firebase and get their URLs
+      console.log(images, "kiee");
+      const imageUrls = await uploadImagesToStorage(images);
 
-        // Initialize the updates object
-        let updates = {};
-        updates[`GE/${view}/Prod/${codigo}`] = data;
-        updates[`GE/Filtros/${view}/${selectedChip1}/${codigo}`] = data;
-        updates[`GE/Vendedores/${vendedor}/Prod/${codigo}`] = data;
-        await update(ref(database), updates);
+      console.log(imageUrls[0]);
 
-        // Add colors to the updates
-        for (const color of chipscolor) {
-          const colorRefKey = push(
-            ref(database, `GE/${view}/Prod/${codigo}/Color`)
-          ).key;
-          const colorPath = `GE/${view}/Prod/${codigo}/Color/${colorRefKey}`;
-          await set(ref(database, colorPath), {
-            label: color,
-            codigo: colorRefKey,
-          });
-        }
+      // // Store first image in 'IMAGEN' field and organize images in the 'imagenes' subnode
+      commonData.Imagen = imageUrls[0];
+      commonData.Imagenes = await createImagesNode(codigo, imageUrls);
 
-        // Add prices to the updates
-        for (const chip in prices) {
-          if (prices.hasOwnProperty(chip)) {
-            const priceRefKey = push(
-              ref(database, `GE/${view}/Prod/${codigo}/Talla`)
-            ).key;
-            const pricePath = `GE/${view}/Prod/${codigo}/Talla/${priceRefKey}`;
-            await set(ref(database, pricePath), {
-              label: chip,
-              precio: parseInt(prices[chip] === "" ? price : prices[chip]),
-              codigo: priceRefKey,
-            });
-          }
-        }
-
-        // Add additional images to the updates
-        for (let i = 0; i < images.length; i++) {
-          if (i === 0) {
-            const url = `GE/${view}/Prod/${codigo}/Imagenes/${codigo}`;
-            await set(ref(database, url), {
-              Imagen: firstImageURL,
-              codigo: codigo,
-            });
-          } else {
-            const uploadedImageUrl = await uploadImage(images[i]);
-
-            const imageRefKey = push(
-              ref(database, `GE/${view}/Prod/${codigo}/Imagenes`)
-            ).key;
-            const url = `GE/${view}/Prod/${codigo}/Imagenes/${imageRefKey}`;
-            await set(ref(database, url), {
-              Imagen: uploadedImageUrl,
-              codigo: imageRefKey,
-            });
-          }
-        }
-
-        // Perform the batch update
-        setTitle("");
-        setPrice("");
-        setDetails("");
-        setImages([]);
-        setSelectedChip(null);
-        setSelectedChip1(null);
-        setSelectedChip2(null);
-
-        setPrices({});
-        setChips([]);
-        setEspacio("");
-        setDimension("");
-
-        setCantidad("");
-        setUbicacion("");
-        setChipscolor([]);
-        setInputValue("");
-        setInputValues("");
-
-        console.log("Publishing item:", data);
-      } catch (error) {
-        alert("ERROR INESPERADO");
-
-        console.error("Transaction failed: ", error);
-      } finally {
-        setLoading(false);
+      // // Organize color and size in their respective subnodes
+      commonData.Color = await createColorsNode(codigo);
+      if (chips.length > 0) {
+        commonData.Talla = await createSizesNode(codigo);
       }
+
+      // // Submit data to 'prod' node
+      if (commonData["0"]) {
+        commonData = commonData["0"]; // Extrae el subobjeto si se generó incorrectamente
+      }
+      await set(newItemRef, commonData);
+
+      // // Store data in 'filtros' node
+      await storeInFiltrosNode(codigo, commonData);
+
+      setLoading(false);
+      setImages([]);
+      setChipscolor([]);
+      setChips([]);
+
+      setTitle("");
+      setDetails("");
+      setPrice("");
+      alert("Data submitted successfully!");
+    } catch (error) {
+      setLoading(false);
+      alert("ERROR INESPERADO");
+      console.error("Transaction failed: ", error);
     }
+  };
+
+  // Prepare the common data object with the provided information
+  const prepareCommonData = async (codigo, fecha) => {
+    // const vendedor =
+    //   view === "Exterior"
+    //     ? "C0y1aQsV5NZNLBuvprio3vXy2LR2"
+    //     : "kbJogy4k8gN7nSK2QUFXwMpXSXz1";
+    let espace = 0.085;
+
+    return {
+      Titulo: title,
+      Categoria: categ,
+      Subcategoria: "Otros",
+      Codigo: codigo,
+      Precio: parseInt(price),
+      Peso: pesin,
+      Detalles: details,
+      Vistos: 0,
+      Vendedor: "C0y1aQsV5NZNLBuvprio3vXy2LR2",
+      Compras: 0,
+      Fecha: fecha,
+      Descuento: 0,
+      Envio: "Aerea",
+      Stock: true,
+      // Bateria: true,
+
+      Dimension: espace,
+      Pais: "China",
+    };
+  };
+
+  // Upload images to Firebase Storage and get their URLs
+  const uploadImagesToStorage = async (imageFiles) => {
+    const imageUrls = [];
+    try {
+      for (let i = 0; i < imageFiles.length; i++) {
+        const imageFile = imageFiles[i];
+
+        // Log image file properties to make sure it's a valid Blob
+        console.log(imageFile, imageFile.type);
+
+        // Generate a unique reference for the image in Firebase Storage
+        const imageRef = storageref(
+          storage,
+          `Imagenes/Productos/${getCurrentTimeInMilliseconds()}.jpeg`
+        );
+
+        // Upload the image (Blob) to Firebase Storage
+        await uploadBytes(imageRef, imageFile);
+
+        // Get the download URL for the uploaded image
+        const imageUrl = await getDownloadURL(imageRef);
+
+        // Push the URL to the imageUrls array
+        imageUrls.push(imageUrl);
+      }
+    } catch (error) {
+      console.error("Error uploading images: ", error);
+    }
+    return imageUrls;
+  };
+
+  // Create the 'imagenes' node with push IDs and URLs
+  const createImagesNode = async (codigo, imageUrls) => {
+    const imagesNode = {};
+    imageUrls.forEach((url) => {
+      const imageRef = push(
+        ref(database, `GE/Exterior/Prod/${codigo}/imagenes`)
+      );
+      imagesNode[imageRef.key] = {
+        Codigo: imageRef.key, // Store the push ID as Codigo
+        Imagen: url, // Store the image URL
+      };
+    });
+    return imagesNode;
+  };
+
+  // Create the 'colores' node with selected colors
+  const createColorsNode = async (codigo) => {
+    const colorsNode = {};
+    chipscolor.forEach((color) => {
+      const colorRef = push(ref(database, `GE/Exterior/Prod/${codigo}/Color`));
+      colorsNode[colorRef.key] = {
+        Codigo: colorRef.key, // Store the push ID as Codigo
+        label: color, // Store the color name
+      };
+    });
+    return colorsNode;
+  };
+
+  // Create the 'tamano' node with selected sizes
+  const createSizesNode = async (codigo) => {
+    const sizesNode = {};
+
+    chips.forEach((size) => {
+      const sizeRef = push(ref(database, `GE/Exterior/Prod/${codigo}/Talla`));
+
+      // Get the price for the size from the prices object
+      const price = parseInt(prices[size]) || 0; // Use an empty string if there's no price
+
+      sizesNode[sizeRef.key] = {
+        Codigo: sizeRef.key, // Store the push ID as Codigo
+        label: size, // Store the size name (chip name)
+        precio: price, // Store the price
+      };
+    });
+
+    return sizesNode;
+  };
+
+  // Store data in the 'filtros' node
+  const storeInFiltrosNode = async (codigo, commonData) => {
+    const filtrosRef = ref(database, `GE/Filtros/Exterior/${categ}/${codigo}`);
+    await set(filtrosRef, {
+      Categoria: commonData.Categoria,
+      Subcategoria: commonData.Subcategoria,
+      Precio: commonData.Precio,
+      Stock: commonData.Stock,
+      Imagen: commonData.Imagen,
+
+      Titulo: commonData.Titulo,
+      Codigo: commonData.Codigo,
+    });
+
+    // Optionally, store the images URLs in the 'filtros' node as well if needed
   };
 
   const handleInputChange = (e) => setInputValue(e.target.value);
@@ -356,7 +358,10 @@ const Publicar = () => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       if (inputValue.trim()) {
-        setChipscolor([...chipscolor, inputValue.trim()]);
+        setChipscolor([
+          ...chipscolor,
+          capitalizeFirstLetter(inputValue.trim()),
+        ]);
         setInputValue("");
       }
     }
@@ -365,8 +370,11 @@ const Publicar = () => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       if (inputValues.trim()) {
-        setChips([...chips, inputValues.trim()]);
-        setPrices({ ...prices, [inputValues.trim()]: "" });
+        setChips([...chips, capitalizeFirstLetter(inputValues.trim())]);
+        setPrices({
+          ...prices,
+          [capitalizeFirstLetter(inputValues.trim())]: "",
+        });
         setInputValues("");
       }
     }
@@ -407,11 +415,38 @@ const Publicar = () => {
   const handlePriceChanges = (e, chipName) => {
     setPrices({ ...prices, [chipName]: e.target.value });
   };
-  const handleButtonClick = (view) => {
+  const handleDownloadAndLoad = async () => {
+    try {
+      const response = await fetch(
+        "https://m.media-amazon.com/images/I/51eVrRhcpWL._AC_SY395_.jpg"
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const blob = await response.blob(); // Convert response to a Blob
+      const url = URL.createObjectURL(blob); // Create a temporary URL for the Blob
+
+      // Add the URL to the state (load it into imgs)
+      setimgs(url);
+      console.log(url);
+
+      // Optionally download the image
+      // up (Optional: revokeObjectURL after ensuring it's no longer needed)
+      // URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading or loading the image:", error);
+    }
+  };
+
+  const handleButtonClick = async (view) => {
+    // handleDownloadAndLoad();
+
     setShowBox(false);
     setView(view);
     // Perform any additional actions based on the selected view
-    console.log(`Selected view: ${view}`);
+    console.log(`Selected view: Exterior`);
   };
   const chipOptions1 = [
     { label: "Aerea", value: "Aerea" },
@@ -448,62 +483,126 @@ const Publicar = () => {
 
         return Array.from(subcategoriesSet);
       }
+      const fetchDatas = async (codigo, estado) => {
+        try {
+          // Include estado as a parameter in the request
+          const response = await axios.get(
+            `http://localhost:3000/fetchWithPagination`,
+            {
+              params: {
+                path: `GE/Categorias/Exterior`,
+              },
+            }
+          );
 
-      const fetchData = (codigo, estado) => {
-        const databaseRef = ref(database, `GE/Categorias/${view}`);
+          console.log("Response status:", response.status);
+          console.log("Response data:", response.data);
 
-        get(databaseRef)
-          .then((snapshot) => {
-            const newData = [];
-            snapshot.forEach((childSnapshot) => {
-              const childData = childSnapshot.val();
-              if (childData && !analizar(childData.Codigo, chipOptions)) {
-                console.log(childData.Estado, "an");
+          const fetchedData = response.data; // Get data from response
 
-                newData.push(childData);
-              }
-            });
-
-            console.log(newData, "wettin");
-
-            setchipOptions(newData);
-          })
-          .catch((error) => {
-            console.error("Error fetching data:", error);
-          });
+          // Update state with the new data
+          setchipOptions(fetchedData);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          if (error.response) {
+            console.error("Error response data:", error.response.data);
+            console.error("Error response status:", error.response.status);
+          }
+        }
       };
 
-      fetchData();
+      // fetchDatas();
     }
     // Cleanup function to unsubscribe when component unmounts
     return () => {
       // Unsubscribe from database
     };
   }, [view]);
-  const fetchData = (selected) => {
-    console.log(selected, "es");
-    const databaseRef = ref(database, `GE/Secciones/${selected}`);
+  const fetchData = async (selected) => {
+    try {
+      // Include estado as a parameter in the request
+      const response = await axios.get(
+        `http://localhost:3000/fetchWithPagination`,
+        {
+          params: {
+            path: `GE/Secciones/Exterior/${selected}`,
+          },
+        }
+      );
 
-    get(databaseRef)
-      .then((snapshot) => {
-        const newData = [];
-        snapshot.forEach((childSnapshot) => {
-          const childData = childSnapshot.val();
-          newData.push(childData);
-        });
+      console.log("Response status:", response.status);
+      console.log("Response data:", response.data);
 
-        console.log(newData, "wettin");
+      const fetchedData = response.data; // Get data from response
 
-        setchipOptionscat(newData);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
+      // Update state with the new data
+      setchipOptionscat(fetchedData);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      if (error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
+    }
+  };
+
+  // Función para leer el archivo Excel y convertirlo en JSON
+  const [data, setData] = useState([]); // Estado para guardar los datos procesados
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Leer el archivo Excel
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const data = new Uint8Array(event.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+
+        // Obtener el nombre de la primera hoja
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+
+        // Convertir la hoja a JSON
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+        // Procesar los datos y descargar las imágenes
+        const processedData = await Promise.all(
+          jsonData.map(async (item) => {
+            let imageUrl = null;
+
+            if (item.url) {
+              try {
+                const response = await fetch(item.url);
+                const blob = await response.blob();
+                imageUrl = URL.createObjectURL(blob); // Crear URL temporal para la imagen
+              } catch (error) {
+                console.error("Error al descargar la imagen:", error);
+              }
+            }
+
+            // Agregar nuevos campos al objeto
+            return {
+              ...item,
+              url: imageUrl || null, // URL de la imagen descargada (o null si falla)
+              vendedor: "Desconocido", // Valor predeterminado
+              compras: Math.floor(Math.random() * 100), // Número aleatorio como ejemplo
+            };
+          })
+        );
+
+        // Actualizar el estado con los datos procesados
+        setData(processedData);
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert("Por favor, selecciona un archivo primero");
+    }
   };
 
   return (
     <Box>
       <Cabezal texto={"Publicar Prod"} />
+      <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} />
       {showbox && (
         <Box sx={{ display: "flex", gap: 5, m: 10 }}>
           <Button
@@ -556,6 +655,11 @@ const Publicar = () => {
           </div>
 
           {chipOptionscat.length > 0 && <Typography>SubCategorias</Typography>}
+          <p>
+            {pesin}
+            {categ}
+          </p>
+
           <div style={{ margin: 10 }}>
             {chipOptionscat.map((option) => (
               <Chip
@@ -580,16 +684,7 @@ const Publicar = () => {
                 fullWidth
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="Ubicacion"
-                variant="outlined"
-                value={ubicacion}
-                onChange={handleUbicacion}
-                required
-                fullWidth
-              />
-            </Grid>
+
             <Grid item xs={12}>
               <TextField
                 label="Price"
@@ -601,7 +696,8 @@ const Publicar = () => {
                 fullWidth
               />
             </Grid>
-            {view === "Nacional" || selectedChip === "Aerea" ? (
+
+            {/* {view === "Nacional" || selectedChip === "Aerea" ? (
               <Grid item xs={12}>
                 <TextField
                   label={`Introduzca los Kg`}
@@ -627,7 +723,7 @@ const Publicar = () => {
                   fullWidth
                 />
               </Grid>
-            )}
+            )} */}
             {/* 
             {view === "Nacional" && (
               <Grid item xs={12}>
@@ -695,6 +791,16 @@ const Publicar = () => {
                 </Box>
               ))}
             </div>
+            <img
+              src={imgs}
+              alt="Image"
+              style={{
+                width: "100%",
+                height: "50%",
+                objectFit: "contain",
+                backgroundColor: "red",
+              }}
+            />
 
             <Grid item xs={12}>
               <Typography variant="subtitle1" gutterBottom>

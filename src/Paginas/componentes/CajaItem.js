@@ -16,6 +16,7 @@ function CajaItem({ dats, valor }) {
     // Navigate to the details page with codigo and context as URL parameters
   };
 
+  console.log(dats);
   return dats?.map((item) => (
     <Box
       onClick={() => handleClick(item.Codigo, item.Contexto)}

@@ -1,41 +1,99 @@
 import React, { useEffect, useState } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
-const useStyles = makeStyles({
-  customStyle: {
-    fontFamily: "CustomFont, Arial, sans-serif",
-    fontWeight: "bold",
-  },
-});
+import { PublicarComentario, UpdateDb } from "../../Servicios/DBservices";
+import CustomText from "./CustomText";
+
 function Feedback() {
   const [inputValue, setInputValue] = useState("");
   const [receivedData, setReceivedData] = useState({});
+  const [publico, setpublico] = useState(false);
 
-  const classes = useStyles();
-  // Mock function to simulate WebView's injectJavaScript
+  const [loading, setloading] = useState(false);
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
+  useEffect(() => {
+    // Send data to WebView when the page loads
+    if (publico) {
+      window.ReactNativeWebView?.postMessage(
+        JSON.stringify({
+          message: "Comentario realizado con éxito",
+          notificacion: false,
+        })
+      );
+    }
+  }, [publico]);
 
+  const subirComentario = async () => {
+    console.log(receivedData, inputValue);
+    setloading(true);
+
+    try {
+      await PublicarComentario(
+        receivedData.Codigo,
+        receivedData.Producto,
+        receivedData.contexto,
+        {
+          comentario: inputValue,
+          usuario: receivedData.Nombre,
+          id: receivedData.Comprador,
+        }
+      );
+
+      setTimeout(() => {
+        alert(
+          "Su comentario ha sido publicado con éxito.\nGracias por ayudarnos a mejorar"
+        );
+
+        // Your code to be executed after 1.5 seconds
+        setloading(false);
+        setpublico(true);
+      }, 1500);
+
+      UpdateDb(
+        { comentario: true },
+        `GE/Comprador/${receivedData.Comprador}/MisCompras/${receivedData.Codigo}`
+      );
+    } catch (error) {
+      alert("Error... Ha ocurrido un error inesperado");
+
+      console.error("Error publishing comment:", error);
+      // Handle error appropriately, e.g., show an error message to the user
+    }
+  };
   const handleButtonClick = () => {
     alert(`Input Value: ${inputValue}`);
     setInputValue("");
   };
 
   useEffect(() => {
-    // Define a global function to receive data
+    // Define a global function to receive data from WebView
     window.receiveData = (data) => {
-      console.log(data);
+      console.log("Received Data: ", data);
 
-      setReceivedData(data);
+      // Parse the incoming data (assuming JSON format)
+      try {
+        const parsedData = JSON.parse(data);
+        setReceivedData(parsedData);
+      } catch (error) {
+        console.error("Invalid JSON data received", error);
+      }
     };
 
-    // Cleanup function to remove the global function
+    // Cleanup to remove the global function when the component unmounts
     return () => {
       delete window.receiveData;
     };
   }, []);
+
   return (
     <Box
       sx={{
@@ -45,13 +103,18 @@ function Feedback() {
         mt: 5,
       }}
     >
-      <Typography variant="h6" align="center" className={classes.customStyle}>
-        NAWETIN: {receivedData.Titulo}
-      </Typography>
-      <h2>
-        Titulo: {receivedData.Titulo}, Precio: {receivedData.Precio} Producto:{" "}
-        {receivedData.Producto}
-      </h2>
+      {loading ? (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          <CircularProgress />
+        </div>
+      ) : null}
       <TextField
         label="Deje su Comentario..."
         variant="outlined"
@@ -62,18 +125,20 @@ function Feedback() {
         sx={{ width: "90%", mb: 2 }}
       />
 
-      <Button
-        variant="contained"
-        color="warning"
-        onClick={handleButtonClick}
-        disabled={!inputValue}
-        sx={{
-          fontFamily: "CustomFont, Arial, sans-serif",
-          fontWeight: "bold",
-        }}
-      >
-        Publicar
-      </Button>
+      {!publico ? (
+        <Button
+          variant="contained"
+          color="warning"
+          onClick={subirComentario}
+          disabled={!inputValue}
+          sx={{
+            fontFamily: "CustomFont, Arial, sans-serif",
+            fontWeight: "bold",
+          }}
+        >
+          Publicar
+        </Button>
+      ) : null}
     </Box>
   );
 }

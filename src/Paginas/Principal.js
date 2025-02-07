@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Grid, Typography, Paper } from "@mui/material";
+import { Grid, Typography, Paper, IconButton } from "@mui/material";
 import Alert from "./componentes/Alert";
+import ImageUploading from "react-images-uploading";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import { compressImage } from "../ayuda";
+import TensorFlow from "./componentes/TensorFlow";
 
 const items = [
   { name: "Compras", link: "/Nacional" },
@@ -15,7 +19,45 @@ const items = [
 const colors = ["#FFCDD2", "#C8E6C9", "#BBDEFB", "#FFECB3"];
 
 const Principal = ({ email, logout }) => {
+  const [images, setImages] = useState([]);
+  const maxNumber = 1; // Only allow one image
+
   const navigate = useNavigate();
+  const dataURLToFile = (dataUrl, filename) => {
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+  // const onChange = (imageList) => {
+  //   setImages(imageList);
+  // };
+  // Handle image compression and uploading
+  const onChange = async (imageList) => {
+    const compressedFiles = await Promise.all(
+      imageList.map(async (image) => {
+        // Convert image data URL to a File object or use the image file directly if available
+        const file = image.file || dataURLToFile(image.data_url, "image.jpg");
+        const compressedFile = await compressImage(file);
+        return {
+          ...image,
+          file: compressedFile,
+        };
+      })
+    );
+
+    // Add the compressed file to the state, ensuring only 1 image is allowed
+    if (compressedFiles.length <= maxNumber) {
+      setImages(compressedFiles);
+    } else {
+      alert("You can upload only 1 image.");
+    }
+  };
 
   const handleBoxClick = (link) => {
     navigate(link);
@@ -43,6 +85,9 @@ const Principal = ({ email, logout }) => {
     logout();
   };
   return (
+    // <div>
+    //   <TensorFlow />
+    // </div>
     <Grid container spacing={2} padding={5}>
       <Alert
         open={open}
@@ -73,12 +118,47 @@ const Principal = ({ email, logout }) => {
               borderRadius: "10px",
             }}
           >
-            <Typography variant="h6" align="center">
+            <Typography align="center" fontSize={"1.2rem"}>
               {item.name}
             </Typography>
           </Paper>
         </Grid>
       ))}
+      <div>
+        <ImageUploading
+          multiple={false} // Disable multiple selection for a single image
+          value={images}
+          onChange={onChange}
+          maxNumber={maxNumber}
+          dataURLKey="data_url"
+        >
+          {({ imageList, onImageUpload, onImageUpdate, dragProps }) => (
+            <div className="upload__image-wrapper">
+              <IconButton
+                sx={{ width: "100%", height: "100%" }}
+                onClick={
+                  images.length === 0 ? onImageUpload : () => onImageUpdate(0)
+                }
+                {...dragProps}
+              >
+                {images.length === 0 ? (
+                  <IconButton sx={{ width: "100%", height: "100%" }}>
+                    <PhotoCameraIcon
+                      style={{ fontSize: "150px", color: "#ccc" }}
+                    />
+                  </IconButton>
+                ) : (
+                  <img
+                    src={images[0].data_url}
+                    alt="Selected"
+                    style={{ width: "80%", height: "100%", borderRadius: 8 }}
+                  />
+                )}
+              </IconButton>
+            </div>
+          )}
+        </ImageUploading>
+      </div>
     </Grid>
   );
 };

@@ -10,7 +10,6 @@ export const extract = (string) => {
 export const lugar = (pais) =>
   pais === "Guinea Ecuatorial" ? "Nacional" : "Exterior";
 
-export const sendNotification = async (token, title, body) => {};
 
 // Function to send notification
 
@@ -86,4 +85,63 @@ export const capitalizeFirstLetter = (str) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
+export let puntodecimal = (n) => {
+  if (n !== undefined) {
+    var parts = n.toString().split(".");
+    const numberPart = parts[0];
+    const thousands = /\B(?=(\d{3})+(?!\d))/g;
+    return numberPart.replace(thousands, ".");
+  }
+};
 export default useNotificationListener;
+export const compressImage = async (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const img = new Image();
+      img.src = reader.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 900;
+
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+          if (width > height && width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          } else if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => resolve(blob),
+          "image/webp", // Use WebP for better compression
+          1.0 // High quality
+        );
+      };
+      img.onerror = (error) => reject(error);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+};
+
+
+const dataURItoBlob = (dataURI) => {
+  const byteString = atob(dataURI.split(",")[1]);
+  const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([ab], { type: mimeString });
+};

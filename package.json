@@ -6,8 +6,8 @@
   
   "private": true,
   
-"homepage": "https://chekea.github.io/Prueba",
-
+  "homepage": "https://chekea.github.io/Prueba",
+  
   "dependencies": {
   
     
@@ -26,6 +26,9 @@
   "@mui/styles": "^5.15.18",
   
     
+  "@tensorflow/tfjs": "^4.21.0",
+  
+    
   "@testing-library/jest-dom": "^5.17.0",
   
     
@@ -33,6 +36,9 @@
   
     
   "@testing-library/user-event": "^13.5.0",
+  
+    
+  "axios": "^1.7.7",
   
     
   "body-parser": "^1.20.2",
@@ -62,6 +68,9 @@
   "react-dom": "^18.2.0",
   
     
+  "react-images-uploading": "^3.1.7",
+  
+    
   "react-router": "^6.22.3",
   
     
@@ -74,21 +83,28 @@
   "recharts": "^2.12.3",
   
     
-  "web-vitals": "^2.1.4"
+  "web-vitals": "^2.1.4",
+  
+    
+  "xlsx": "^0.18.5"
   
   },
   
   "scripts": {
   
-   
     
   "start": "GENERATE_SOURCEMAP=false react-scripts start",
   
     
   "build": "GENERATE_SOURCEMAP=false react-scripts build",
   
-    "predeploy": "npm run build",
+    
+  "predeploy": "npm run build",
+  
+    
   "deploy": "gh-pages -d build",
+  
+    
   "test": "react-scripts test",
   
     
@@ -101,7 +117,7 @@
   "dev": "concurrently \"npm run start\" \"npm run server\""
   
   },
-
+  
   "eslintConfig": {
   
     

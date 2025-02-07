@@ -2,16 +2,22 @@ import React, { useState } from "react";
 import { Button, Modal, TextField, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router";
 
-const Passcode = ({ open, onClose }) => {
+const Passcode = ({ open, onClose, codigo, enviardatos }) => {
   const [passcode, setPasscode] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    onClose(); // Close the modal after submission
+  const handleSubmit = async () => {
+    if (codigo === passcode) {
+      // Handle the passcode (e.g., send to a backend, validate)
+      alert(`Passcode entered:${codigo} ${passcode}`);
+      await enviardatos();
 
-    // Handle the passcode (e.g., send to a backend, validate)
-    alert(`Passcode entered: ${passcode}`);
-    navigate(`/Pagos/Success`);
+      setPasscode("");
+      navigate(`/Pagos/Success`);
+    } else {
+      alert(`Contrasexa Incorrecta`);
+    }
+    onClose(); // Close the modal after submission
   };
 
   return (

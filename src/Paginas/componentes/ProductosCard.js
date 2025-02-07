@@ -34,6 +34,7 @@ function ProductosCard({ data, enviado, isBuscar }) {
     setSelectedImage(null);
   };
 
+  console.log(data);
   return (
     <>
       {data.map((item, index) => (

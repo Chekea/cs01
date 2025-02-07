@@ -10,8 +10,17 @@ import {
   runTransaction,
   get,
 } from "firebase/database";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 
 const database = getDatabase(app);
+const storage = getStorage(app);
+
+export const getCurrentTimestamp = () => Date.now();
 
 export const RemoveVaueDB = async (path) => {
   const nodeRef = ref(database, path);
@@ -68,8 +77,6 @@ export const WriteDbPush = async (objeto, reference) => {
   }
 };
 export const UpdateDb = async (objeto, reference) => {
-  const database = getDatabase(app);
-
   const databaseRef = ref(database, reference); // Replace '-Mabc123' with the actual key of the record you want to update
 
   // Update the field with the new value
@@ -85,27 +92,48 @@ export const UpdateDb = async (objeto, reference) => {
     });
 };
 
-export const sendNotif = (vendedor, titulo, cuerpo) => {
-  const databaseRef = ref(database, `GE/Token/${vendedor}`);
-  console.log("HORAS MUCHO");
+export let PublicarComentario = async (codigo, id, contexto, obj) => {
+  try {
+    console.log(id, contexto, obj, "mani");
 
-  get(databaseRef)
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const token = snapshot.val().token;
-        console.log(token);
-        // Assuming you have a function to send push notifications
-        // Implement this function using the appropriate library
-        sendNotification(token, titulo, cuerpo);
-      } else {
-        console.log("Snapshot does not exist");
-        // Handle case where snapshot does not exist
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      // Handle error
+    // Reference for the comments section
+    const databaseRef = ref(database, `GE/${contexto}/Prod/${id}/Comentarios`);
+
+    // Create a new push reference for the comment
+    const newPushRef = push(databaseRef);
+    const pushKey = newPushRef.key;
+    console.log("Push key:", pushKey);
+
+    // Store the push key inside the object if needed
+    obj.pushKey = pushKey;
+
+    // Create a reference to the new location with the push key for the comment
+    const newLocationRef = ref(
+      database,
+      `GE/${contexto}/Prod/${id}/Comentarios/${pushKey}`
+    );
+
+    // Push the updated object to the new location
+    await set(newLocationRef, obj);
+
+    // Reference to the product node to add a flag (e.g., a flag that a new comment exists)
+    const productRef = ref(
+      database,
+      `GE/Comprador/${obj["id"]}/MisCompras/Retirado/${codigo}`
+    );
+
+    // Update the product node with a flag (for example, 'hasComments': true)
+    await update(productRef, {
+      Coment: true,
     });
+
+    console.log("Comment published and product flagged successfully.");
+  } catch (error) {
+    alert("Error... Ha ocurrido un error inesperado");
+
+    console.error("Error publishing comment:", error);
+    // Handle the error as needed
+  }
 };
 
 export const decrementValue = (amount, path, vendedor, codigo, contexto) => {
@@ -189,4 +217,133 @@ export const updateStock = (codigo, contexto) => {
     .catch((error) => {
       console.error("Error updating node:", error.message);
     });
+};
+
+export let subircompra = async (
+  productos,
+  valStatic,
+  path,
+  img,
+  comisiones
+) => {
+  try {
+    let comprasArray = [];
+
+    await Promise.all(
+      productos.map(async (item) => {
+        // Reference for the comments section
+        const databaseRef = ref(
+          database,
+          `GE/Comprador/${item["Comprador"]}/MisCompras/Verificando`
+        );
+
+        // Create a new push reference for the comment
+        const newPushRef = push(databaseRef);
+        const pushKey = newPushRef.key;
+
+        let fecha = getCurrentTimestamp();
+
+        item["Codigo"] = pushKey;
+        item["Fecha"] = fecha;
+
+        update(databaseRef, item)
+          .then(() => {
+            console.log(
+              "Data updated in Firebase Realtime Database successfully."
+            );
+          })
+          .catch((error) => {
+            console.error(
+              "Error updating data in Firebase Realtime Database:",
+              error
+            );
+          });
+
+        comprasArray.push({ id: pushKey, vendedor: item["Vendedor"] });
+      })
+    );
+
+    await subirotro(comprasArray, valStatic, path, img);
+  } catch (error) {
+    console.error("Error updating MisCompras:", error);
+    // Mostrardialogo("Error", "Ha ocurrido un error inesperado", () => {}, true);
+
+    // Handle the error appropriately, e.g., show a message to the user
+  }
+};
+export let subirotro = async (a, statico, path, img) => {
+  try {
+    // Reference for the comments section
+    const databaseRef = ref(database, path);
+
+    // Create a new push reference for the comment
+    const newPushRef = push(databaseRef);
+
+    const pushKey = newPushRef.key;
+
+    const fech = getCurrentTimestamp();
+
+    statico["Codigo"] = pushKey;
+    statico["CompraId"] = fech;
+
+    update(newPushRef, statico)
+      .then(() => {
+        console.log("Data updated in Firebase Realtime Database successfully.");
+      })
+      .catch((error) => {
+        console.error(
+          "Error updating data in Firebase Realtime Database:",
+          error
+        );
+      });
+
+    if (img !== "") {
+      // await subirimagen(
+      //   img,
+      //   `${path}/${codio}`,
+      //   `Recibos/Recibo Compra/${fech}.jpeg`
+      // );
+    }
+    for (const item of a) {
+      const itemReference = ref(
+        database,
+        `${path}/${pushKey}/Productos/${item.id}`
+      );
+
+      await update(itemReference, item);
+    }
+  } catch (error) {
+    console.error("Error while uploading data:", error);
+    // Handle the error appropriately, e.g., show a message to the user
+  }
+};
+export const uploadImage = async (file, path) => {
+  const imageRef = storageRef(storage, path);
+  await uploadBytes(imageRef, file);
+  console.log(getDownloadURL(imageRef));
+
+  return await getDownloadURL(imageRef);
+};
+
+export const sendNotif = async (path) => {
+  const databaseRef = ref(database, path);
+
+  try {
+    const snapshot = await get(databaseRef);
+    if (snapshot.exists()) {
+      const token = snapshot.val();
+      console.log("Token obtenido:", token);
+
+      // Llamar a la función de envío de notificación
+
+      // Devolver el token
+      return token;
+    } else {
+      console.log("Snapshot does not exist");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return null;
+  }
 };
